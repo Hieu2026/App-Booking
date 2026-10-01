@@ -21,7 +21,7 @@ const digits = (s: string) => s.replace(/\D/g, "");
 const moneyIn = (s: string) => { const d = digits(s); return d ? new Intl.NumberFormat("vi-VN").format(Number(d)) : ""; };
 
 interface FormState {
-  consultantId: string; eventName: string; customerName: string; phone: string; sourceId: string;
+  consultantOptionId: string; eventName: string; customerName: string; phone: string; sourceId: string;
   bookedDate: string; bookedTime: string; date: string; from: string; to: string; nextDay: boolean;
   tableIds: string[]; party: string; kids: string; items: Item[]; purposeId: string; decoration: string;
   deposit: string; depositMethodId: string; depositDate: string; requests: string; contract: string;
@@ -31,7 +31,7 @@ interface FormState {
 function fromBooking(b: Booking): FormState {
   const s = vnParts(b.start_at), e = vnParts(b.end_at), bk = b.booked_at ? vnParts(b.booked_at) : null;
   return {
-    consultantId: b.consultant_id ?? "", eventName: b.event_name ?? "", customerName: b.customer_name ?? "", phone: b.customer_phone ?? "",
+    consultantOptionId: b.consultant_option_id ?? "", eventName: b.event_name ?? "", customerName: b.customer_name ?? "", phone: b.customer_phone ?? "",
     sourceId: b.source_id ?? "", bookedDate: bk?.date ?? "", bookedTime: bk?.time ?? "", date: s.date, from: s.time, to: e.time,
     nextDay: e.date !== s.date, tableIds: b.tables.map((t) => t.id), party: String(b.party_size), kids: String(b.children_count),
     items: b.items.map((i) => ({ key: uid(), name: i.name, qty: String(i.qty), note: i.note ?? "" })),
@@ -45,7 +45,7 @@ function fromBooking(b: Booking): FormState {
 const FIELD_NAMES: [keyof FormState, string][] = [
   ["customerName", "Tên khách"], ["phone", "Số điện thoại"], ["eventName", "Tên tiệc"], ["date", "Ngày"], ["from", "Giờ bắt đầu"], ["to", "Giờ kết thúc"],
   ["tableIds", "Bàn"], ["party", "Số khách"], ["kids", "Số trẻ em"], ["deposit", "Tiền cọc"], ["requests", "Yêu cầu riêng"], ["decoration", "Trang trí"],
-  ["contract", "Mã HĐ"], ["purposeId", "Mục đích"], ["sourceId", "Nguồn khách"], ["items", "Món yêu cầu"], ["consultantId", "Nhân viên tư vấn"],
+  ["contract", "Mã HĐ"], ["purposeId", "Mục đích"], ["sourceId", "Nguồn khách"], ["items", "Món yêu cầu"], ["consultantOptionId", "Nhân viên tư vấn"],
 ];
 const changedFields = (a: FormState, b: FormState) => FIELD_NAMES.filter(([k]) => {
   const x = k === "items" ? JSON.stringify(a.items.map((i) => [i.name, i.qty, i.note])) : JSON.stringify(a[k]);
@@ -77,7 +77,7 @@ export function BookingForm({ booking, prefill }: { booking?: Booking; prefill?:
       : chosen ? prefill!.to!
       : timeOf(Math.min(minutesOf(from) + ctx.settings.default_duration_minutes, 23 * 60 + 59));
     return {
-      consultantId: ctx.me.id, eventName: "", customerName: "", phone: "", sourceId: "",
+      consultantOptionId: ctx.lookups.find((l) => l.kind === "consultant" && l.active && l.label.toLowerCase() === ctx.me.full_name.toLowerCase())?.id ?? "", eventName: "", customerName: "", phone: "", sourceId: "",
       bookedDate: todayVn(now), bookedTime: timeOf(nm), date, from, to, nextDay: false,
       tableIds: prefill?.tableId ? [prefill.tableId] : [], party: "", kids: "0", items: [], purposeId: "", decoration: "",
       deposit: "", depositMethodId: "", depositDate: "", requests: "", contract: "", changeNote: "", status: "pending",
@@ -171,7 +171,7 @@ export function BookingForm({ booking, prefill }: { booking?: Booking; prefill?:
   function payload() {
     return {
       data: {
-        consultant_id: f.consultantId || null, event_name: f.eventName, customer_name: f.customerName, customer_phone: f.phone,
+        consultant_option_id: f.consultantOptionId || null, event_name: f.eventName, customer_name: f.customerName, customer_phone: f.phone,
         source_id: f.sourceId || null, purpose_id: f.purposeId || null, start_at: startIso, end_at: endIso,
         booked_at: f.bookedDate && f.bookedTime ? fromVn(f.bookedDate, f.bookedTime) : null,
         party_size: party, children_count: Number(f.kids) || 0, decoration: f.decoration, special_requests: f.requests,
@@ -331,9 +331,9 @@ export function BookingForm({ booking, prefill }: { booking?: Booking; prefill?:
               </select>
             </Field>
             <Field label="Nhân viên tư vấn" htmlFor="consultantId">
-              <select id="consultantId" className="input" value={f.consultantId} onChange={(e) => set("consultantId", e.target.value)}>
+              <select id="consultantId" className="input" value={f.consultantOptionId} onChange={(e) => set("consultantOptionId", e.target.value)}>
                 <option value="">— Chưa chọn —</option>
-                {ctx.staff.map((s) => <option key={s.id} value={s.id}>{s.full_name}</option>)}
+                {lookups("consultant", f.consultantOptionId).map((l) => <option key={l.id} value={l.id}>{l.label}{l.active ? "" : " (đã ẩn)"}</option>)}
               </select>
             </Field>
             <Field label="Ngày giờ khách đặt bàn / đặt tiệc" hint="Thời điểm khách báo đặt (khác với lúc nhân viên nhập vào hệ thống).">

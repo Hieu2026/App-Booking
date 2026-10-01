@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
     ["Tính ngày theo", r.basis === "booked" ? "Ngày khách đặt bàn / đặt tiệc" : "Ngày diễn ra tiệc"],
     ["Từ ngày", r.df ? fmtDate(r.df) : "(không giới hạn)"], ["Đến ngày", r.dt ? fmtDate(r.dt) : "(không giới hạn)"],
     ["Từ khóa", r.q || "(không)"], ["Tầng / khu", c.floors.find((f) => f.code === r.floor)?.name ?? "(tất cả)"],
-    ["Nhân viên tư vấn", c.staff.find((s) => s.id === r.consultant)?.full_name ?? "(tất cả)"],
+    ["Nhân viên tư vấn", name(c.lookups, r.consultant) || "(tất cả)"],
     ["Nguồn khách", name(c.lookups, r.source) || "(tất cả)"], ["Mục đích tiệc", name(c.lookups, r.purpose) || "(tất cả)"],
     ["Trạng thái", r.status.length ? r.status.map((s) => BOOKING_STATUS[s].label).join(", ") : "(tất cả)"],
     ["Tình trạng cọc", r.deposit === "has" ? "Đã cọc" : r.deposit === "none" ? "Chưa cọc" : "(tất cả)"],

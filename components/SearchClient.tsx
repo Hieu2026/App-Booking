@@ -99,7 +99,7 @@ export function SearchClient({ params, result, pageSize, floors, staff, lookups 
         <div>
           <label className="label" htmlFor="consultant">Nhân viên tư vấn</label>
           <select id="consultant" className="input" value={consultant} onChange={(e) => setConsultant(e.target.value)}>
-            <option value="">Tất cả</option>{staff.map((s) => <option key={s.id} value={s.id}>{s.full_name}</option>)}
+            <option value="">Tất cả</option>{lk("consultant").map((l) => <option key={l.id} value={l.id}>{l.label}</option>)}
           </select>
         </div>
         <div>

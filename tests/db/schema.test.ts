@@ -35,7 +35,7 @@ describe("Danh mục bàn (seed)", () => {
     for (let i = 0; i < 2; i++)
       execFileSync("psql", ["-q", "-v", "ON_ERROR_STOP=1", "-h", "127.0.0.1", "-U", "khoai_test", "-d", process.env.TEST_DB ?? "khoai_test", "-f", f], { env: { ...process.env, PGPASSWORD: "test" } });
     const [r] = await sql("select count(*)::int n, (select capacity from dining_tables where code='A1') a1, (select count(*)::int from lookups) l from dining_tables");
-    expect(r).toEqual({ n: 29, a1: 7, l: 15 });
+    expect(r).toEqual({ n: 29, a1: 7, l: 22 });
     await sql("update dining_tables set capacity = 4 where code = 'A1'");
   });
   it("giờ mở cửa mặc định 10:00–22:00, đệm 0 phút", async () => {

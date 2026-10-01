@@ -6,7 +6,7 @@ export interface TableRef { id: string; code: string; floor_code: string; capaci
 export interface BookingItem { name: string; qty: number; note: string | null }
 export interface Booking {
   id: string; code: string; status: BookingStatus; is_walk_in: boolean; is_demo: boolean;
-  consultant_id: string | null; consultant_name: string | null;
+  consultant_id: string | null; consultant_option_id: string | null; consultant_name: string | null;
   event_name: string | null; customer_name: string | null; customer_phone: string | null;
   source_id: string | null; source_label: string | null; purpose_id: string | null; purpose_label: string | null;
   start_at: string; end_at: string; booked_at: string | null;
@@ -22,7 +22,7 @@ export interface BoardTable {
   note: string | null; serving_booking_id: string | null; serving_booking_code: string | null;
 }
 export interface Floor { code: string; name: string; sort_order: number }
-export interface Lookup { id: string; kind: "source" | "purpose" | "deposit_method"; label: string; active: boolean; sort_order: number }
+export interface Lookup { id: string; kind: "source" | "purpose" | "deposit_method" | "consultant"; label: string; active: boolean; sort_order: number }
 export interface Settings { open_time: string; close_time: string; buffer_minutes: number; default_duration_minutes: number }
 export interface StaffRef { id: string; full_name: string; role: Role }
 export interface AppContext {

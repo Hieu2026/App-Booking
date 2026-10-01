@@ -27,5 +27,7 @@ insert into public.lookups (kind, label, sort_order) values
   ('source', 'Facebook', 4), ('source', 'Khách vãng lai', 5), ('source', 'Đối tác / công ty', 6),
   ('purpose', 'Sinh nhật', 1), ('purpose', 'Tiệc gia đình', 2), ('purpose', 'Tiệc công ty', 3),
   ('purpose', 'Họp mặt bạn bè', 4), ('purpose', 'Liên hoan / tất niên', 5), ('purpose', 'Khác', 6),
+  ('source', 'BNI', 7), ('source', 'TikTok', 8), ('source', 'Website', 9),
+  ('consultant', 'Lễ tân', 1), ('consultant', 'Khánh Hồng', 2), ('consultant', 'Cát Tường', 3), ('consultant', 'Uyên Hồ', 4),
   ('deposit_method', 'Tiền mặt', 1), ('deposit_method', 'Chuyển khoản', 2), ('deposit_method', 'Thẻ', 3)
 on conflict (kind, label) do nothing;

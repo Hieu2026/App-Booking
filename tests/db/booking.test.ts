@@ -442,3 +442,68 @@ describe("Khoảng đệm dọn bàn (cấu hình)", () => {
     expect((await rpc(mgr, "admin_save_settings", ["10:00", "22:00", 0, 120])).error).toBeNull();
   });
 });
+
+describe("Nhân viên tư vấn & nguồn khách (danh mục cấu hình được)", () => {
+  const opt = async (kind: string, label: string) => (await sql("select id from lookups where kind=$1 and label=$2", [kind, label]))[0].id as string;
+
+  it("danh mục mẫu có đủ: nguồn BNI/TikTok/Website; tư vấn Lễ tân, Khánh Hồng, Cát Tường, Uyên Hồ", async () => {
+    const src = (await sql("select label from lookups where kind='source'")).map((r: any) => r.label);
+    expect(src).toEqual(expect.arrayContaining(["BNI", "TikTok", "Website"]));
+    const con = (await sql("select label from lookups where kind='consultant' order by sort_order")).map((r: any) => r.label);
+    expect(con).toEqual(["Lễ tân", "Khánh Hồng", "Cát Tường", "Uyên Hồ"]);
+  });
+
+  it("lưu / sửa / lọc / sắp xếp / lịch sử theo nhân viên tư vấn và nguồn khách", async () => {
+    const [kh, ct, bni] = await Promise.all([opt("consultant", "Khánh Hồng"), opt("consultant", "Cát Tường"), opt("source", "BNI")]);
+    const d = "2043-02-02";
+    const a = await create(rec1, ["A1"], { start_at: vn(d, "12:00"), end_at: vn(d, "13:00"), consultant_option_id: kh, source_id: bni, customer_name: "Khách KH" });
+    const b = await create(rec1, ["A2"], { start_at: vn(d, "12:00"), end_at: vn(d, "13:00"), consultant_option_id: ct, customer_name: "Khách CT" });
+    expect(a.error).toBeNull();
+    const got = (await rpc(rec2, "get_booking", [a.data.id])).data;
+    expect(got).toMatchObject({ consultant_option_id: kh, consultant_name: "Khánh Hồng", source_label: "BNI" });
+    const only = (await rpc(rec2, "search_bookings", [{ consultant_id: kh, date_from: d, date_to: d }])).data;
+    expect(only.rows.map((r: any) => r.customer_name)).toEqual(["Khách KH"]);
+    const sorted = (await rpc(rec2, "search_bookings", [{ date_from: d, date_to: d }, "consultant", "desc"])).data;
+    expect(sorted.rows.map((r: any) => r.consultant_name)).toEqual(["Khánh Hồng", "Cát Tường"]);
+    const up = await rpc(rec2, "update_booking", [uuid(), b.data.id, 1, { consultant_option_id: kh }]);
+    expect(up.error).toBeNull();
+    const h = (await rpc(rec2, "get_booking_history", [b.data.id])).data;
+    expect(h[0].changes.diff["Nhân viên tư vấn"]).toEqual({ from: "Cát Tường", to: "Khánh Hồng" });
+  });
+
+  it("quản lý thêm / ẩn nhân viên tư vấn; lễ tân thì không", async () => {
+    expect((await rpc(rec1, "admin_save_lookup", [null, "consultant", "Người Mới", true, 9])).error?.message).toBe("E_FORBIDDEN");
+    const r = await rpc(mgr, "admin_save_lookup", [null, "consultant", "Người Mới", true, 9]);
+    expect(r.error).toBeNull();
+    expect((await rpc(mgr, "admin_save_lookup", [null, "consultant", "Người Mới", true, 9])).error?.message).toBe("E_VALIDATION");
+    expect((await rpc(mgr, "admin_save_lookup", [r.data.id, "consultant", "Người Mới", false, 9])).error).toBeNull();
+    expect((await rpc(mgr, "admin_save_lookup", [null, "khong_co", "X", true, 1])).error?.message).toBe("E_VALIDATION");
+  });
+});
+
+describe("Nâng cấp từ cấu trúc cũ (0001–0004) lên 0005", () => {
+  it("giữ nguyên dữ liệu cũ, tên tư vấn cũ vẫn hiển thị, chức năng mới dùng được", async () => {
+    const { execFileSync } = await import("node:child_process");
+    const path = await import("node:path");
+    const env = { ...process.env, PGPASSWORD: "test" };
+    const psql = (db: string, ...a: string[]) => execFileSync("psql", ["-q", "-v", "ON_ERROR_STOP=1", "-h", "127.0.0.1", "-U", "khoai_test", "-d", db, ...a], { env, stdio: "pipe" }).toString();
+    const root = path.join(__dirname, "../..");
+    execFileSync("dropdb", ["--force", "--if-exists", "-h", "127.0.0.1", "-U", "khoai_test", "khoai_up"], { env });
+    execFileSync("createdb", ["-h", "127.0.0.1", "-U", "khoai_test", "khoai_up"], { env });
+    psql("khoai_up", "-f", path.join(__dirname, "supabase_shim.sql"));
+    for (const f of ["0001_schema", "0002_logic", "0003_read_api", "0004_security"]) psql("khoai_up", "-f", path.join(root, `supabase/migrations/${f}.sql`));
+    psql("khoai_up", "-c", `
+      insert into floors values ('T1','Tầng trệt',1);
+      insert into dining_tables (code, floor_code, capacity) values ('A1','T1',4);
+      insert into auth.users (id,email) values ('00000000-0000-0000-0000-0000000000aa','cu@x');
+      insert into profiles (id, full_name, email, role) values ('00000000-0000-0000-0000-0000000000aa','Nhân Viên Cũ','cu@x','manager');
+      insert into bookings (consultant_id, customer_name, customer_phone, start_at, end_at, party_size)
+        values ('00000000-0000-0000-0000-0000000000aa','Khách Cũ','0900000009','2044-01-01T05:00:00Z','2044-01-01T06:00:00Z',2);`);
+    psql("khoai_up", "-f", path.join(root, "supabase/migrations/0005_consultants_sources.sql"));
+    psql("khoai_up", "-f", path.join(root, "supabase/migrations/0005_consultants_sources.sql"));   // chạy lại không lỗi
+    const out = psql("khoai_up", "-tA", "-c", `set role authenticated; select set_config('request.jwt.claims','{"sub":"00000000-0000-0000-0000-0000000000aa"}',false);
+      select (public.search_bookings('{}'::jsonb)->'rows'->0->>'consultant_name') || '|' || (select count(*) from lookups where kind='consultant');`);
+    expect(out.split("\n").filter((l) => l.includes("|"))[0].trim()).toBe("Nhân Viên Cũ|4");
+    execFileSync("dropdb", ["--force", "-h", "127.0.0.1", "-U", "khoai_test", "khoai_up"], { env });
+  });
+});

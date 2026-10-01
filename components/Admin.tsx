@@ -156,7 +156,7 @@ export function TablesAdmin({ tables, floors }: { tables: TableRow[]; floors: Fl
 }
 
 // ------------------------------------------------------------------ danh mục
-const KIND_LABEL: Record<string, string> = { source: "Nguồn khách", purpose: "Thể loại / Mục đích tiệc", deposit_method: "Phương thức cọc" };
+const KIND_LABEL: Record<string, string> = { consultant: "Nhân viên tư vấn", source: "Nguồn khách", purpose: "Thể loại / Mục đích tiệc", deposit_method: "Phương thức cọc" };
 export function LookupsAdmin({ lookups }: { lookups: Lookup[] }) {
   const run = useRun();
   const [busy, setBusy] = useState(false);

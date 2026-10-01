@@ -67,7 +67,7 @@ app/                 Trang & Server Actions (Next.js App Router)
 components/          Thành phần giao diện (Board, BookingForm, SearchClient, Admin…)
 lib/                 Thời gian VN, tính trạng thái bàn, cột báo cáo, xuất Excel, lỗi tiếng Việt
 proxy.ts             Chặn truy cập chưa đăng nhập
-supabase/migrations  0001 cấu trúc · 0002 logic ghi · 0003 hàm đọc · 0004 phân quyền/RLS/realtime
+supabase/migrations  0001 cấu trúc · 0002 logic ghi · 0003 hàm đọc · 0004 phân quyền/RLS/realtime · 0005 danh mục nhân viên tư vấn
 supabase/seed.sql    29 bàn + danh mục mẫu (chạy lặp lại không tạo trùng)
 supabase/demo/       Dữ liệu DEMO (tách riêng) + script xóa sạch
 supabase/bootstrap_manager.sql   Tạo quản lý đầu tiên
@@ -84,7 +84,8 @@ docs/                Hướng dẫn lễ tân, sao lưu/phục hồi, kết qu�
 2. **Authentication → Providers → Email**: bật Email, **tắt “Allow new users to sign up”** (không mở đăng ký công khai). Có thể tắt “Confirm email” nếu dùng cách tạo tài khoản ở mục 6 (tài khoản được tạo sẵn ở trạng thái đã xác nhận).
 3. Tạo cấu trúc dữ liệu — chọn **một** cách:
    * **Cách A — SQL Editor (đơn giản nhất):** mở *SQL Editor*, lần lượt dán và chạy nội dung các file theo đúng thứ tự:
-     `supabase/migrations/0001_schema.sql` → `0002_logic.sql` → `0003_read_api.sql` → `0004_security.sql` → `supabase/seed.sql`.
+     `supabase/migrations/0001_schema.sql` → `0002_logic.sql` → `0003_read_api.sql` → `0004_security.sql` → `0005_consultants_sources.sql` → `supabase/seed.sql` (hoặc dán một lần file gộp `supabase/setup_all.sql`).
+     *Đã cài từ bản cũ (chỉ 0001–0004)?* Chạy thêm `supabase/upgrade_0005.sql` — an toàn với dữ liệu đang có, chạy lặp lại không lỗi.
    * **Cách B — Supabase CLI:** `npx supabase login`, `npx supabase link --project-ref <ref>`, `npx supabase db push`, rồi chạy `supabase/seed.sql` trong SQL Editor (`db push` không tự chạy seed trên dự án thật).
 4. **Database → Replication / Publications**: kiểm tra `supabase_realtime` có các bảng `bookings, booking_tables, dining_tables, booking_items` (migration 0004 đã tự thêm). Realtime hỏng thì ứng dụng vẫn tự làm mới mỗi ~20 giây.
 5. Lấy khóa tại **Project Settings → API**: *Project URL*, khóa công khai (*anon / publishable*), khóa bí mật (*service_role / secret*).

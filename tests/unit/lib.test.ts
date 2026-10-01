@@ -11,7 +11,7 @@ const T = (code: string, over: Partial<BoardTable> = {}): BoardTable => ({
   id: code, code, floor_code: "T1", capacity: 4, ops_status: "ready", active: true, note: null, serving_booking_id: null, serving_booking_code: null, ...over,
 });
 const B = (id: string, tables: string[], start: string, end: string, status: Booking["status"] = "confirmed"): Booking => ({
-  id, code: `KH-${id}`, status, is_walk_in: false, is_demo: false, consultant_id: null, consultant_name: null, event_name: null, customer_name: "Khách " + id,
+  id, code: `KH-${id}`, status, is_walk_in: false, is_demo: false, consultant_id: null, consultant_option_id: null, consultant_name: null, event_name: null, customer_name: "Khách " + id,
   customer_phone: "0900000000", source_id: null, source_label: null, purpose_id: null, purpose_label: null, start_at: start, end_at: end, booked_at: null,
   party_size: 4, children_count: 0, decoration: null, special_requests: null, deposit_amount: null, deposit_method_id: null, deposit_method_label: null,
   deposit_date: null, contract_code: null, cancel_reason: null, change_note: null, override_reason: null, version: 1, created_at: start, created_by_name: null,

@@ -149,3 +149,27 @@ test("tạo phiếu xác nhận dạng PNG và PDF để đính kèm", async ({ 
   (await import("node:fs")).writeFileSync(".test-artifacts/phieu.png", png.buf);
   (await import("node:fs")).writeFileSync(".test-artifacts/phieu.pdf", pdf.buf);
 });
+
+test("danh mục nhân viên tư vấn và nguồn khách có các lựa chọn mới; lưu và lọc theo đó", async ({ page }) => {
+  await login(page, USERS.le1);
+  await page.goto("/dat-ban/moi?date=2042-03-03");
+  const opts = async (label: string) => (await page.getByLabel(label).locator("option").allTextContents()).map((t) => t.trim());
+  expect(await opts("Nhân viên tư vấn")).toEqual(expect.arrayContaining(["Lễ tân", "Khánh Hồng", "Cát Tường", "Uyên Hồ"]));
+  expect(await opts("Nguồn khách")).toEqual(expect.arrayContaining(["BNI", "TikTok", "Website"]));
+  await page.getByLabel("Giờ bắt đầu").fill("12:00");
+  await page.getByLabel("Giờ kết thúc dự kiến").fill("13:00");
+  await page.getByLabel("Nhân viên tư vấn").selectOption({ label: "Uyên Hồ" });
+  await page.getByLabel("Nguồn khách").selectOption({ label: "Website" });
+  await fillBooking(page, { name: "Khách Tư Vấn", phone: "0911111112", party: "2", tables: ["B2.2"] });
+  await page.getByRole("button", { name: "Lưu lượt đặt" }).click();
+  await expect(page).toHaveURL(/\/dat-ban\/[0-9a-f-]{36}$/);
+  await expect(page.getByLabel("Nhân viên tư vấn")).toContainText("Uyên Hồ");
+  await page.goto("/dat-ban?basis=event&df=2042-03-03&dt=2042-03-03");
+  await page.getByLabel("Nhân viên tư vấn").selectOption({ label: "Uyên Hồ" });
+  await page.getByRole("button", { name: "Tìm / lọc" }).click();
+  await expect(page.getByText("Khách Tư Vấn")).toBeVisible();
+  await expect(page.getByRole("cell", { name: "Uyên Hồ" })).toBeVisible();
+  await page.getByLabel("Nhân viên tư vấn").selectOption({ label: "Cát Tường" });
+  await page.getByRole("button", { name: "Tìm / lọc" }).click();
+  await expect(page.getByText("Không có lượt đặt nào khớp")).toBeVisible();
+});
