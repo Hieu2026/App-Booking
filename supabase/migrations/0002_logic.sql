@@ -139,6 +139,7 @@ language plpgsql security definer set search_path = public, pg_temp as $$
 declare r public.idempotency_keys;
 begin
   if p_key is null then return null; end if;
+  delete from public.idempotency_keys where created_at < now() - interval '3 days';
   -- Nếu cùng khóa đang được xử lý ở phiên khác, lệnh này chờ phiên đó xong.
   insert into public.idempotency_keys (key, actor_id) values (p_key, auth.uid())
     on conflict (key) do nothing;

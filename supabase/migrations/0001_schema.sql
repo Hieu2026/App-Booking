@@ -169,3 +169,4 @@ create table public.idempotency_keys (
   result      jsonb,
   created_at  timestamptz not null default now()
 );
+create index idempotency_keys_created_idx on public.idempotency_keys (created_at);

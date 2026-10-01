@@ -237,3 +237,15 @@ begin
   perform private.require_manager();
   return (select coalesce(jsonb_agg(to_jsonb(p) order by p.role, p.full_name), '[]'::jsonb) from profiles p);
 end $$;
+
+-- Danh mục bàn đầy đủ (kể cả bàn đã ngưng dùng) cho màn hình quản lý
+create function public.get_all_tables() returns jsonb
+language plpgsql stable set search_path = public, extensions, pg_temp as $$
+begin
+  perform private.require_manager();
+  return (select coalesce(jsonb_agg(jsonb_build_object(
+      'id', t.id, 'code', t.code, 'floor_code', t.floor_code, 'capacity', t.capacity,
+      'ops_status', t.ops_status, 'active', t.active, 'note', t.note, 'sort_order', t.sort_order)
+      order by f.sort_order, t.sort_order, t.code), '[]'::jsonb)
+    from dining_tables t join floors f on f.code = t.floor_code);
+end $$;

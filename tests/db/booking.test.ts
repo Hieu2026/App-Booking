@@ -429,3 +429,16 @@ describe("Giờ & tiền", () => {
     expect(p.data_type).toBe("text");
   });
 });
+
+describe("Khoảng đệm dọn bàn (cấu hình)", () => {
+  it("đệm 15 phút: lượt liền kề bị chặn, cách đủ 15 phút thì được; đổi lại 0 phút", async () => {
+    const d = "2041-03-03";
+    expect((await rpc(mgr, "admin_save_settings", ["10:00", "22:00", 15, 120])).error).toBeNull();
+    expect((await create(rec1, ["A8"], { start_at: vn(d, "12:00"), end_at: vn(d, "14:00") })).error).toBeNull();
+    expect((await create(rec2, ["A8"], { start_at: vn(d, "14:00"), end_at: vn(d, "15:00") })).error?.message).toBe("E_OVERLAP");
+    expect((await create(rec2, ["A8"], { start_at: vn(d, "14:15"), end_at: vn(d, "15:00") })).error).toBeNull();
+    expect((await rpc(rec1, "admin_save_settings", ["10:00", "22:00", 0, 120])).error?.message).toBe("E_FORBIDDEN");
+    expect((await rpc(mgr, "admin_save_settings", ["22:00", "10:00", 0, 120])).error?.message).toBe("E_VALIDATION");
+    expect((await rpc(mgr, "admin_save_settings", ["10:00", "22:00", 0, 120])).error).toBeNull();
+  });
+});

@@ -27,7 +27,7 @@ grant execute on function
   public.get_context(), public.get_board(date), public.get_booking(uuid), public.get_booking_history(uuid),
   public.get_availability(timestamptz, timestamptz, uuid),
   public.search_bookings(jsonb, text, text, int, int),
-  public.get_audit_log(jsonb, int, int), public.get_profiles(),
+  public.get_audit_log(jsonb, int, int), public.get_profiles(), public.get_all_tables(),
   public.create_booking(uuid, jsonb, uuid[], jsonb, text, boolean),
   public.update_booking(uuid, uuid, int, jsonb, uuid[], jsonb, text),
   public.move_booking_table(uuid, uuid, int, uuid, uuid, text),
