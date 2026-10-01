@@ -7,7 +7,7 @@ export default function LoginPage() {
       <div className="w-full max-w-sm">
         <div className="mb-6 text-center">
           <Logo size="lg" />
-          <p className="mt-1 text-stone-600">Quản lý bàn &amp; đặt tiệc</p>
+          <p className="mt-2 text-stone-600">Quản lý bàn &amp; đặt tiệc</p>
         </div>
         <div className="card">
           <h1 className="mb-4 text-lg font-bold">Đăng nhập nhân viên</h1>

@@ -1,30 +1,32 @@
 @import "tailwindcss";
 
 @theme {
-  --color-cream-50: #fdfaf3;
-  --color-cream-100: #f8f1e1;
-  --color-cream-200: #efe4c9;
-  --color-cream-300: #e3d3ad;
-  --color-leaf-50: #eef5f0;
-  --color-leaf-100: #d6e8dc;
-  --color-leaf-200: #aecfba;
-  --color-leaf-500: #4a8466;
-  --color-leaf-600: #3b6b52;
-  --color-leaf-700: #2f5a44;
-  --color-leaf-800: #244635;
-  --color-leaf-900: #1a3326;
-  --color-clay-100: #fbe8dd;
-  --color-clay-400: #db8559;
-  --color-clay-500: #c8643a;
-  --color-clay-600: #b25229;
-  --color-clay-700: #8f4020;
+  /* Màu thương hiệu Khoái: đỏ #DE000F (lấy từ logo). Tên "leaf-*" là thang màu CHÍNH (đỏ thương hiệu),
+     "clay-*" là màu NHẤN (than ấm), "cream-*" là nền ấm nhạt. */
+  --color-cream-50: #fffbf9;
+  --color-cream-100: #fcf0ed;
+  --color-cream-200: #f6e0da;
+  --color-cream-300: #eccfc6;
+  --color-leaf-50: #fff1f2;
+  --color-leaf-100: #ffe0e2;
+  --color-leaf-200: #fbb6bb;
+  --color-leaf-500: #ea2a38;
+  --color-leaf-600: #e8303d;
+  --color-leaf-700: #de000f;
+  --color-leaf-800: #b8000c;
+  --color-leaf-900: #6e0008;
+  --color-clay-100: #f1ece9;
+  --color-clay-400: #8a817c;
+  --color-clay-500: #2b2523;
+  --color-clay-600: #1a1614;
+  --color-clay-700: #120f0e;
   --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
 }
 
 @layer base {
   html { -webkit-text-size-adjust: 100%; }
   body { @apply bg-cream-50 text-stone-800 antialiased; font-size: 16px; line-height: 1.5; }
-  :focus-visible { outline: 3px solid var(--color-clay-400); outline-offset: 2px; }
+  :focus-visible { outline: 3px solid var(--color-leaf-500); outline-offset: 2px; }
 }
 
 @utility btn { @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 py-2 text-base font-semibold transition

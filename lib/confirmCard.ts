@@ -4,7 +4,7 @@ import type { Booking } from "./types";
 // Tạo "phiếu xác nhận đặt bàn" dạng ảnh (PNG) hoặc PDF ngay trên trình duyệt để nhân viên đính kèm gửi khách.
 // Chỉ dùng thông tin có trong lượt đặt; không tự thêm địa chỉ/số điện thoại nhà hàng.
 
-const W = 1080, PAD = 64, GREEN = "#2f5a44", CLAY = "#c8643a", INK = "#292524", MUTE = "#78716c";
+const W = 1080, PAD = 64, GREEN = "#b8000c", CLAY = "#de000f", INK = "#2b2523", MUTE = "#78716c";
 const FONT = `"Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif`;
 
 export function cardRows(b: Booking): [string, string][] {
@@ -38,7 +38,17 @@ function wrap(ctx: CanvasRenderingContext2D, text: string, maxW: number) {
   return out;
 }
 
-export function renderCard(b: Booking): HTMLCanvasElement {
+function loadLogo(): Promise<HTMLImageElement | null> {
+  return new Promise((res) => {
+    const img = new Image();
+    img.onload = () => res(img);
+    img.onerror = () => res(null);
+    img.src = "/logo.png";
+  });
+}
+
+export async function renderCard(b: Booking): Promise<HTMLCanvasElement> {
+  const logo = await loadLogo();
   const rows = cardRows(b);
   const canvas = document.createElement("canvas");
   const probe = canvas.getContext("2d")!;
@@ -46,20 +56,24 @@ export function renderCard(b: Booking): HTMLCanvasElement {
   probe.font = `30px ${FONT}`;
   const wrapped = rows.map(([, v]) => wrap(probe, v, VW));
   const bodyH = wrapped.reduce((s, l) => s + l.length * LH + 22, 0);
-  const H = 285 + bodyH + 10 + 70 + 150;
+  const TOP = 240, BOX = TOP + 120;
+  const H = BOX + bodyH + 10 + 70 + 150;
   canvas.width = W; canvas.height = H;
   const ctx = canvas.getContext("2d")!;
-  ctx.fillStyle = "#fdfaf3"; ctx.fillRect(0, 0, W, H);
-  ctx.fillStyle = GREEN; ctx.fillRect(0, 0, W, 170);
-  ctx.fillStyle = "#fff"; ctx.textBaseline = "alphabetic";
-  ctx.font = `bold 62px Georgia, "Times New Roman", serif`; ctx.fillText("Nhà hàng Khoái", PAD, 92);
-  ctx.font = `28px ${FONT}`; ctx.fillStyle = "#d6e8dc"; ctx.fillText("PHIẾU XÁC NHẬN ĐẶT BÀN", PAD, 138);
-  ctx.fillStyle = CLAY; ctx.fillRect(0, 170, W, 8);
+  ctx.fillStyle = "#fffbf9"; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, W, TOP);
+  ctx.fillStyle = CLAY; ctx.fillRect(0, TOP, W, 12);
+  let tx = PAD;
+  if (logo) { const lh = 196, lw = Math.round((lh * logo.width) / logo.height); ctx.drawImage(logo, PAD, 22, lw, lh); tx = PAD + lw + 40; }
+  ctx.textBaseline = "alphabetic";
+  ctx.fillStyle = CLAY; ctx.font = `bold 46px ${FONT}`; ctx.fillText("PHIẾU XÁC NHẬN", tx, 100);
+  ctx.fillText("ĐẶT BÀN", tx, 156);
+  ctx.fillStyle = MUTE; ctx.font = `26px ${FONT}`; ctx.fillText("Nhà hàng Khoái · Hải sản & đặc sản Nha Trang", tx, 202);
 
   ctx.fillStyle = INK; ctx.font = `bold 40px ${FONT}`;
-  ctx.fillText(`Mã đặt chỗ: ${b.code}`, PAD, 240);
-  let y = 285;
-  ctx.fillStyle = "#fff"; ctx.strokeStyle = "#e3d3ad"; ctx.lineWidth = 2;
+  ctx.fillText(`Mã đặt chỗ: ${b.code}`, PAD, TOP + 80);
+  let y = BOX;
+  ctx.fillStyle = "#fff"; ctx.strokeStyle = "#eccfc6"; ctx.lineWidth = 2;
   ctx.beginPath(); ctx.roundRect(PAD, y, W - 2 * PAD, bodyH + 10, 20); ctx.fill(); ctx.stroke();
   y += 22;
   rows.forEach(([label], i) => {
@@ -67,9 +81,9 @@ export function renderCard(b: Booking): HTMLCanvasElement {
     ctx.font = `30px ${FONT}`; ctx.fillStyle = INK;
     wrapped[i].forEach((ln, k) => ctx.fillText(ln, VX, y + 30 + k * LH));
     y += wrapped[i].length * LH + 22;
-    if (i < rows.length - 1) { ctx.strokeStyle = "#f0e8d4"; ctx.beginPath(); ctx.moveTo(LX, y - 10); ctx.lineTo(W - PAD - 24, y - 10); ctx.stroke(); }
+    if (i < rows.length - 1) { ctx.strokeStyle = "#f6e0da"; ctx.beginPath(); ctx.moveTo(LX, y - 10); ctx.lineTo(W - PAD - 24, y - 10); ctx.stroke(); }
   });
-  y = 285 + bodyH + 10 + 80;
+  y = BOX + bodyH + 10 + 80;
   ctx.fillStyle = INK; ctx.font = `italic 30px ${FONT}`;
   ctx.fillText("Cảm ơn quý khách, rất hân hạnh được phục vụ!", PAD, y);
   ctx.fillStyle = MUTE; ctx.font = `24px ${FONT}`;
@@ -80,13 +94,14 @@ export function renderCard(b: Booking): HTMLCanvasElement {
 
 export const fileBase = (b: Booking) => `xac-nhan-${b.code}`;
 
-export function cardPng(b: Booking): Promise<Blob> {
-  return new Promise((res, rej) => renderCard(b).toBlob((x) => (x ? res(x) : rej(new Error("png"))), "image/png"));
+export async function cardPng(b: Booking): Promise<Blob> {
+  const canvas = await renderCard(b);
+  return new Promise((res, rej) => canvas.toBlob((x) => (x ? res(x) : rej(new Error("png"))), "image/png"));
 }
 
 /** PDF 1 trang chứa ảnh phiếu (JPEG nhúng), kích thước theo ảnh. */
 export async function cardPdf(b: Booking): Promise<Blob> {
-  const canvas = renderCard(b);
+  const canvas = await renderCard(b);
   const jpg = Uint8Array.from(atob(canvas.toDataURL("image/jpeg", 0.92).split(",")[1]), (c) => c.charCodeAt(0));
   const pw = Math.round(canvas.width * 0.5), ph = Math.round(canvas.height * 0.5);
   const enc = new TextEncoder();

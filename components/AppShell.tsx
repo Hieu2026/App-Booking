@@ -19,7 +19,7 @@ function Inner({ name, role, children }: { name: string; role: string; children:
   return (
     <div className="min-h-dvh">
       <ConnectionBanner />
-      <header className="sticky top-0 z-30 border-b border-cream-300 bg-cream-50/95 backdrop-blur print:hidden">
+      <header className="sticky top-0 z-30 border-b-4 border-leaf-700 bg-white/95 backdrop-blur print:hidden">
         <div className="mx-auto flex max-w-[1500px] flex-wrap items-center gap-x-4 gap-y-2 px-3 py-2 sm:px-5">
           <Link href="/" aria-label="Về trang chủ"><Logo /></Link>
           <nav className="order-3 flex w-full gap-1 overflow-x-auto sm:order-none sm:w-auto" aria-label="Điều hướng chính">

@@ -45,7 +45,7 @@ Trạng thái lượt đặt: *Chờ xác nhận → Đã xác nhận → Đã �
 * Một lượt đặt có thể gắn **nhiều bàn**; không khẳng định các bàn ghép được về vật lý. STT/STN là hai đơn vị đặt nguyên khối.
 * Khoảng đệm dọn bàn mặc định **0 phút**; thời lượng gợi ý **120 phút** (Quản lý → Cấu hình).
 * Danh mục *nguồn khách, mục đích tiệc, phương thức cọc* là **mẫu đề xuất** (xem `supabase/seed.sql`), Quản lý sửa/thêm/ẩn trong ứng dụng.
-* Màu kem – xanh lá trầm – cam đất và logo chữ “Khoái” là phương án đề xuất, không phải nhận diện chính thức.
+* Logo và màu chủ đạo (đỏ `#DE000F`) lấy từ logo nhà hàng cung cấp; file logo ở `public/logo.png`, bảng màu ở `app/globals.css`.
 * Tiền cọc **chỉ để theo dõi**: không phải doanh thu, không xử lý thanh toán/hoàn tiền khi hủy.
 * “Gửi xác nhận”: ứng dụng **tạo phiếu xác nhận dạng ảnh PNG hoặc file PDF** (ngay trên trình duyệt, từ thông tin đã lưu) để nhân viên đính kèm vào tin nhắn Zalo/SMS/email gửi khách. Có thêm lời nhắn soạn sẵn và nút mở SMS/Zalo/Email; **không tự gửi**. Phiếu chỉ chứa thông tin có trong lượt đặt (không tự thêm địa chỉ/số điện thoại nhà hàng).
 * Sheet “Trường TT” nhắc cài trên máy local; theo yêu cầu hiện tại, ứng dụng chạy **online trên Vercel + Supabase**.

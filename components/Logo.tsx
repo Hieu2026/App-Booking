@@ -1,8 +1,10 @@
+import Image from "next/image";
+
+/** Logo nhà hàng Khoái (file public/logo.png). */
 export function Logo({ size = "md" }: { size?: "md" | "lg" }) {
-  // Logo chữ tạm thời — không phải nhận diện thương hiệu chính thức của nhà hàng.
+  const h = size === "lg" ? 150 : 44;
   return (
-    <span className={`font-extrabold tracking-tight text-leaf-800 ${size === "lg" ? "text-5xl" : "text-2xl"}`} style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
-      Khoái<span className="text-clay-500">.</span>
-    </span>
+    <Image src="/logo.png" alt="Khoái — Hải sản & đặc sản Nha Trang" width={Math.round((h * 582) / 601)} height={h} priority
+      className="inline-block w-auto" style={{ height: h }} />
   );
 }
