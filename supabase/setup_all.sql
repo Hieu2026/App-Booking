@@ -1,24 +1,14 @@
--- GỘP SẴN để dán một lần vào Supabase SQL Editor: 4 migration (theo thứ tự) + seed. Chỉ chạy MỘT lần trên dự án mới.
--- Được tạo tự động từ các file trong supabase/migrations và seed.sql; nếu sửa migration, tạo lại file này.
-
--- ================= migrations/0001_schema.sql =================
--- Khoái — Quản lý bàn & đặt tiệc
--- Migration 0001: cấu trúc dữ liệu
--- Chạy lại nhiều lần an toàn khi dùng qua công cụ migration (mỗi file chỉ chạy một lần).
 
 create schema if not exists extensions;
 create schema if not exists private;
 create extension if not exists btree_gist with schema extensions;
 create extension if not exists unaccent with schema extensions;
 
--- ---------------------------------------------------------------- kiểu dữ liệu
 create type public.user_role as enum ('receptionist', 'manager');
 create type public.booking_status as enum
   ('pending', 'confirmed', 'arrived', 'completed', 'cancelled', 'no_show');
 create type public.table_ops_status as enum ('ready', 'serving', 'cleaning', 'suspended');
 
--- ---------------------------------------------------------------- tài khoản nhân viên
--- Chỉ người có dòng ở đây (và active = true) mới truy cập được dữ liệu nghiệp vụ.
 create table public.profiles (
   id          uuid primary key references auth.users (id) on delete cascade,
   full_name   text not null check (btrim(full_name) <> ''),
@@ -29,19 +19,15 @@ create table public.profiles (
   updated_at  timestamptz not null default now()
 );
 
--- ---------------------------------------------------------------- cấu hình (1 dòng)
 create table public.app_settings (
   id                        int primary key default 1 check (id = 1),
   open_time                 time not null default '10:00',
   close_time                time not null default '22:00',
-  -- Khoảng đệm dọn bàn sau mỗi lượt (phút). Đề xuất mặc định: 0.
   buffer_minutes            int  not null default 0 check (buffer_minutes between 0 and 240),
-  -- Thời lượng gợi ý khi tạo lượt đặt mới (phút). Đề xuất: 120.
   default_duration_minutes  int  not null default 120 check (default_duration_minutes between 15 and 720),
   updated_at                timestamptz not null default now()
 );
 
--- ---------------------------------------------------------------- khu vực & bàn
 create table public.floors (
   code        text primary key,
   name        text not null,
@@ -63,7 +49,6 @@ create table public.dining_tables (
 );
 create index dining_tables_floor_idx on public.dining_tables (floor_code, sort_order);
 
--- ---------------------------------------------------------------- danh mục cấu hình được
 create table public.lookups (
   id          uuid primary key default gen_random_uuid(),
   kind        text not null check (kind in ('source', 'purpose', 'deposit_method')),
@@ -73,7 +58,6 @@ create table public.lookups (
   unique (kind, label)
 );
 
--- ---------------------------------------------------------------- lượt đặt
 create sequence public.booking_code_seq start 1;
 
 create table public.bookings (
@@ -137,8 +121,6 @@ create table public.booking_items (
 );
 create index booking_items_booking_idx on public.booking_items (booking_id);
 
--- Bàn gắn với lượt đặt. "during" và "holds" do trigger tự điền để chống trùng lịch
--- ngay trong cơ sở dữ liệu: một bàn không thể có hai lượt giữ chỗ giao nhau.
 create table public.booking_tables (
   booking_id  uuid not null references public.bookings (id) on delete cascade,
   table_id    uuid not null references public.dining_tables (id),
@@ -150,7 +132,6 @@ create table public.booking_tables (
 );
 create index booking_tables_table_idx on public.booking_tables (table_id);
 
--- ---------------------------------------------------------------- nhật ký (chỉ ghi thêm)
 create table public.audit_log (
   id          bigint generated always as identity primary key,
   at          timestamptz not null default now(),
@@ -166,7 +147,6 @@ create table public.audit_log (
 create index audit_log_booking_idx on public.audit_log (booking_id, at);
 create index audit_log_at_idx on public.audit_log (at desc);
 
--- ---------------------------------------------------------------- chống gửi lặp
 create table public.idempotency_keys (
   key         uuid primary key,
   actor_id    uuid not null,
@@ -175,14 +155,8 @@ create table public.idempotency_keys (
 );
 create index idempotency_keys_created_idx on public.idempotency_keys (created_at);
 
--- ================= migrations/0002_logic.sql =================
--- Migration 0002: hàm hỗ trợ, trigger và các thao tác ghi dữ liệu (RPC)
--- Mọi thao tác ghi nghiệp vụ đi qua các hàm này: kiểm tra quyền, chống trùng lịch,
--- kiểm soát phiên bản, chống gửi lặp và ghi nhật ký đều nằm trong CÙNG một giao dịch.
-
 insert into public.app_settings (id) values (1) on conflict (id) do nothing;
 
--- ---------------------------------------------------------------- tiện ích
 create function private.tz() returns text language sql immutable as $$ select 'Asia/Ho_Chi_Minh'::text $$;
 
 create function private.is_staff() returns boolean
@@ -196,7 +170,6 @@ language sql stable security definer set search_path = public, pg_temp as $$
                  where p.id = auth.uid() and p.active and p.role = 'manager')
 $$;
 
--- Ném lỗi nghiệp vụ: message = mã lỗi, detail = JSON mô tả thêm.
 create function private.fail(p_code text, p_detail jsonb default null) returns void
 language plpgsql as $$
 begin
@@ -235,7 +208,6 @@ returns void language sql security definer set search_path = public, pg_temp as 
           p_entity, p_entity_id, p_booking, p_action, p_summary, p_changes)
 $$;
 
--- Nhật ký chỉ được ghi thêm, kể cả với chủ sở hữu hàm.
 create function private.audit_immutable() returns trigger language plpgsql as $$
 begin
   raise exception 'Nhật ký không được sửa hoặc xóa.' using errcode = 'P0001';
@@ -245,7 +217,6 @@ create trigger audit_log_no_update before update or delete on public.audit_log
 create trigger audit_log_no_truncate before truncate on public.audit_log
   for each statement execute function private.audit_immutable();
 
--- Ảnh chụp nghiệp vụ của lượt đặt (để so sánh trước/sau trong nhật ký)
 create function private.booking_snapshot(p_id uuid) returns jsonb
 language sql stable security definer set search_path = public, pg_temp as $$
   select jsonb_build_object(
@@ -279,8 +250,6 @@ language sql stable security definer set search_path = public, pg_temp as $$
   from bookings b where b.id = p_id
 $$;
 
--- ---------------------------------------------------------------- trigger chống trùng lịch
--- Điền khoảng chiếm chỗ (có khoảng đệm dọn bàn) và cờ giữ chỗ cho dòng bàn mới.
 create function private.bt_fill() returns trigger language plpgsql as $$
 declare v_buf int;
 begin
@@ -294,7 +263,6 @@ end $$;
 create trigger booking_tables_fill before insert on public.booking_tables
   for each row execute function private.bt_fill();
 
--- Khi đổi giờ / đổi trạng thái lượt đặt, đồng bộ lại các dòng bàn.
 create function private.bookings_sync() returns trigger language plpgsql as $$
 declare v_buf int;
 begin
@@ -311,14 +279,12 @@ create trigger bookings_sync after update of status, start_at, end_at on public.
                      or old.end_at is distinct from new.end_at)
   execute function private.bookings_sync();
 
--- ---------------------------------------------------------------- chống gửi lặp
 create function private.idem_begin(p_key uuid) returns jsonb
 language plpgsql security definer set search_path = public, pg_temp as $$
 declare r public.idempotency_keys;
 begin
   if p_key is null then return null; end if;
   delete from public.idempotency_keys where created_at < now() - interval '3 days';
-  -- Nếu cùng khóa đang được xử lý ở phiên khác, lệnh này chờ phiên đó xong.
   insert into public.idempotency_keys (key, actor_id) values (p_key, auth.uid())
     on conflict (key) do nothing;
   select * into r from public.idempotency_keys where key = p_key;
@@ -333,7 +299,6 @@ language sql security definer set search_path = public, pg_temp as $$
   update public.idempotency_keys set result = p_result where key = p_key
 $$;
 
--- ---------------------------------------------------------------- bắt đầu phục vụ
 create function private.start_serving(p_booking uuid, p_tables uuid[]) returns void
 language plpgsql security definer set search_path = public, pg_temp as $$
 declare t record;
@@ -350,9 +315,6 @@ begin
   end loop;
 end $$;
 
--- ---------------------------------------------------------------- tạo / sửa lượt đặt
--- p_data: các trường lượt đặt. Khi sửa, trường không có trong p_data giữ nguyên.
--- p_tables / p_items: null = giữ nguyên.
 create function private.save_booking(
   p_id uuid, p_expected int, p_data jsonb, p_tables uuid[], p_items jsonb,
   p_override text, p_walk_in boolean default false)
@@ -411,7 +373,6 @@ begin
     v_walk := b.is_walk_in;
   end if;
 
-  -- ---- đọc & kiểm tra dữ liệu
   v_start := nullif(d ->> 'start_at', '')::timestamptz;
   v_end   := nullif(d ->> 'end_at', '')::timestamptz;
   if v_start is null then perform private.invalid('start_at', 'Chọn ngày giờ bắt đầu.'); end if;
@@ -454,7 +415,6 @@ begin
     perform private.fail('E_TABLE_SUSPENDED', jsonb_build_object('tables', to_jsonb(v_susp)));
   end if;
 
-  -- ---- cảnh báo (chỉ khi thời gian / bàn / số khách thay đổi hoặc tạo mới)
   if v_new then
     v_changed := true;
   else
@@ -484,7 +444,6 @@ begin
     end if;
   end if;
 
-  -- ---- ghi dữ liệu (ràng buộc loại trừ ở bảng booking_tables chặn trùng lịch)
   begin
     if v_new then
       v_status := case when v_walk then 'arrived'
@@ -544,7 +503,6 @@ begin
     perform private.fail('E_OVERLAP', jsonb_build_object('conflicts', coalesce(v_conf, '[]'::jsonb)));
   end;
 
-  -- ---- món yêu cầu
   if p_items is not null then
     delete from booking_items where booking_id = v_id;
     for v_item in select * from jsonb_array_elements(p_items) loop
@@ -557,7 +515,6 @@ begin
     end loop;
   end if;
 
-  -- ---- trạng thái bàn khi lượt đặt đang phục vụ
   if v_new and v_walk then
     perform private.start_serving(v_id, v_tabs);
   elsif not v_new and b.status = 'arrived' then
@@ -566,7 +523,6 @@ begin
     perform private.start_serving(v_id, v_tabs);
   end if;
 
-  -- ---- nhật ký
   if v_new then
     perform private.audit('booking', v_id::text, v_id, 'create',
       case when v_walk then 'Tiếp nhận khách vãng lai' else 'Tạo lượt đặt' end,
@@ -585,7 +541,6 @@ begin
   return jsonb_build_object('id', b.id, 'code', b.code, 'version', b.version, 'status', b.status);
 end $$;
 
--- ---------------------------------------------------------------- RPC công khai (cho người đã đăng nhập)
 create function public.create_booking(
   p_request_id uuid, p_data jsonb, p_tables uuid[],
   p_items jsonb default '[]'::jsonb, p_override_reason text default null,
@@ -615,7 +570,6 @@ begin
   return v;
 end $$;
 
--- Chuyển bàn: thay một bàn bằng bàn khác (nguyên tử, kiểm tra trùng lịch lại).
 create function public.move_booking_table(
   p_request_id uuid, p_id uuid, p_expected_version int,
   p_from uuid, p_to uuid, p_override_reason text default null)
@@ -635,7 +589,6 @@ begin
   return v;
 end $$;
 
--- Đổi trạng thái: confirm | check_in | complete | cancel | no_show
 create function public.set_booking_status(
   p_request_id uuid, p_id uuid, p_expected_version int, p_action text, p_reason text default null)
 returns jsonb language plpgsql security definer set search_path = public, extensions, pg_temp as $$
@@ -679,7 +632,6 @@ begin
   select coalesce(array_agg(table_id), '{}') into v_tabs from booking_tables where booking_id = p_id;
 
   if p_action = 'check_in' then
-    -- Có bàn tạm ngưng thì không bắt đầu phục vụ được.
     perform 1 from dining_tables where id = any(v_tabs) and ops_status = 'suspended';
     if found then
       perform private.fail('E_TABLE_SUSPENDED', jsonb_build_object('tables',
@@ -708,7 +660,6 @@ begin
   return v;
 end $$;
 
--- Vận hành bàn: ready (xác nhận sẵn sàng / mở lại) | suspended (tạm ngưng)
 create function public.set_table_status(p_table_id uuid, p_status text, p_note text default null)
 returns jsonb language plpgsql security definer set search_path = public, extensions, pg_temp as $$
 declare t public.dining_tables; v_upcoming int;
@@ -744,7 +695,6 @@ begin
   return jsonb_build_object('id', t.id, 'code', t.code, 'ops_status', p_status, 'upcoming_bookings', v_upcoming);
 end $$;
 
--- ---------------------------------------------------------------- quản lý (chỉ vai trò quản lý)
 create function public.admin_save_table(
   p_id uuid, p_code text, p_floor_code text, p_capacity int,
   p_active boolean default true, p_note text default null, p_sort_order int default null)
@@ -854,9 +804,6 @@ begin
   return jsonb_build_object('id', p.id);
 end $$;
 
--- ================= migrations/0003_read_api.sql =================
--- Migration 0003: các hàm đọc dữ liệu (chạy với quyền của người gọi → áp dụng RLS)
-
 create function private.booking_json(b public.bookings) returns jsonb
 language sql stable set search_path = public, extensions, pg_temp as $$
   select jsonb_build_object(
@@ -888,7 +835,6 @@ language sql stable set search_path = public, extensions, pg_temp as $$
   )
 $$;
 
--- Thông tin chung sau đăng nhập
 create function public.get_context() returns jsonb
 language plpgsql stable set search_path = public, extensions, pg_temp as $$
 begin
@@ -905,7 +851,6 @@ begin
   );
 end $$;
 
--- Bảng bàn theo ngày: danh sách bàn + các lượt đặt trong ngày (kèm lượt đang phục vụ)
 create function public.get_board(p_day date) returns jsonb
 language plpgsql stable set search_path = public, extensions, pg_temp as $$
 declare
@@ -948,7 +893,6 @@ begin
             from audit_log a where a.booking_id = p_id);
 end $$;
 
--- Tình trạng từng bàn trong một khung giờ (để chọn bàn khi đặt)
 create function public.get_availability(p_start timestamptz, p_end timestamptz, p_exclude uuid default null)
 returns jsonb language plpgsql stable set search_path = public, extensions, pg_temp as $$
 declare v_buf int; v_range tstzrange;
@@ -977,7 +921,6 @@ begin
     from dining_tables t join floors f on f.code = t.floor_code where t.active);
 end $$;
 
--- Tìm kiếm / lọc / sắp xếp lượt đặt. p_limit null = lấy tất cả (dùng cho xuất Excel, tối đa 20.000).
 create function public.search_bookings(
   p_filters jsonb default '{}'::jsonb, p_sort text default 'start_at', p_dir text default 'desc',
   p_limit int default 50, p_offset int default 0)
@@ -1057,7 +1000,6 @@ begin
                             'total_deposit', v_tot.deposit, 'rows', v_rows);
 end $$;
 
--- Nhật ký (chỉ quản lý)
 create function public.get_audit_log(p_filters jsonb default '{}'::jsonb, p_limit int default 100, p_offset int default 0)
 returns jsonb language plpgsql stable set search_path = public, extensions, pg_temp as $$
 declare
@@ -1095,7 +1037,6 @@ begin
   return (select coalesce(jsonb_agg(to_jsonb(p) order by p.role, p.full_name), '[]'::jsonb) from profiles p);
 end $$;
 
--- Danh mục bàn đầy đủ (kể cả bàn đã ngưng dùng) cho màn hình quản lý
 create function public.get_all_tables() returns jsonb
 language plpgsql stable set search_path = public, extensions, pg_temp as $$
 begin
@@ -1107,10 +1048,6 @@ begin
     from dining_tables t join floors f on f.code = t.floor_code);
 end $$;
 
--- ================= migrations/0004_security.sql =================
--- Migration 0004: phân quyền (RLS), cấp quyền hàm, realtime
-
--- ---- thu hồi mọi quyền mặc định, chỉ cấp lại những gì cần
 revoke all on all tables in schema public from anon, authenticated;
 revoke all on all sequences in schema public from anon, authenticated;
 revoke all on all functions in schema public from public, anon, authenticated;
@@ -1122,17 +1059,14 @@ alter default privileges in schema public revoke execute on functions from publi
 grant usage on schema public, private, extensions to authenticated;
 revoke usage on schema private from anon;
 
--- Chỉ ĐỌC trực tiếp bảng (cần cho Realtime); mọi thao tác ghi đi qua hàm RPC bên dưới.
 grant select on public.profiles, public.app_settings, public.floors, public.dining_tables,
                 public.lookups, public.bookings, public.booking_items, public.booking_tables,
                 public.audit_log to authenticated;
 
--- Hàm tiện ích dùng trong chính sách RLS và hàm đọc
 grant execute on function private.is_staff(), private.is_manager(), private.require_staff(),
   private.require_manager(), private.fail(text, jsonb), private.invalid(text, text),
   private.booking_json(public.bookings), private.tz() to authenticated;
 
--- Hàm API (chỉ người đã đăng nhập; bên trong còn kiểm tra nhân viên còn hoạt động / quản lý)
 grant execute on function
   public.get_context(), public.get_board(date), public.get_booking(uuid), public.get_booking_history(uuid),
   public.get_availability(timestamptz, timestamptz, uuid),
@@ -1149,7 +1083,6 @@ grant execute on function
   public.admin_set_profile(uuid, text, public.user_role, boolean)
 to authenticated;
 
--- ---- RLS
 alter table public.profiles          enable row level security;
 alter table public.app_settings      enable row level security;
 alter table public.floors            enable row level security;
@@ -1160,7 +1093,6 @@ alter table public.booking_items     enable row level security;
 alter table public.booking_tables    enable row level security;
 alter table public.audit_log         enable row level security;
 alter table public.idempotency_keys  enable row level security;
--- Không bật FORCE: chủ sở hữu (hàm SECURITY DEFINER) ghi được; API không có quyền ghi trực tiếp.
 
 create policy profiles_select on public.profiles for select to authenticated
   using (id = auth.uid() or private.is_staff());
@@ -1171,12 +1103,9 @@ create policy lookups_select  on public.lookups for select to authenticated usin
 create policy bookings_select on public.bookings for select to authenticated using (private.is_staff());
 create policy items_select    on public.booking_items for select to authenticated using (private.is_staff());
 create policy bt_select       on public.booking_tables for select to authenticated using (private.is_staff());
--- Nhật ký: quản lý xem tất cả; lễ tân chỉ xem lịch sử của lượt đặt.
 create policy audit_select    on public.audit_log for select to authenticated
   using (private.is_manager() or (private.is_staff() and entity = 'booking'));
--- idempotency_keys: không có chính sách nào → không ai (qua API) đọc/ghi được.
 
--- ---- Realtime (Supabase): chỉ phát những bảng cần; RLS vẫn áp dụng cho kênh realtime
 do $$
 begin
   if exists (select 1 from pg_publication where pubname = 'supabase_realtime') then
@@ -1185,10 +1114,6 @@ begin
   end if;
 end $$;
 
--- ================= seed.sql =================
--- Dữ liệu khởi tạo thật của nhà hàng (nguồn: "Cấu hình NH Khoái.xlsx").
--- Chạy lặp lại an toàn: không tạo trùng, không ghi đè thay đổi do quản lý đã sửa.
-
 insert into public.floors (code, name, sort_order) values
   ('T1', 'Tầng trệt', 1),
   ('T2', 'Tầng 2', 2),
@@ -1196,20 +1121,16 @@ insert into public.floors (code, name, sort_order) values
 on conflict (code) do nothing;
 
 insert into public.dining_tables (code, floor_code, capacity, sort_order) values
-  -- TẦNG TRỆT — 15 bàn, 60 khách
   ('A1', 'T1', 4, 1), ('A2', 'T1', 4, 2), ('A3', 'T1', 6, 3), ('A4', 'T1', 4, 4), ('A5', 'T1', 2, 5),
   ('A6', 'T1', 4, 6), ('A7', 'T1', 4, 7), ('A8', 'T1', 6, 8), ('A9', 'T1', 4, 9), ('A10', 'T1', 2, 10),
   ('A11', 'T1', 4, 11), ('A12', 'T1', 4, 12), ('A13', 'T1', 4, 13), ('A14', 'T1', 4, 14), ('A15', 'T1', 4, 15),
-  -- TẦNG 2 — 12 bàn/khu, 89 khách
   ('VIP 1', 'T2', 10, 1), ('VIP 4', 'T2', 5, 2), ('VIP 7', 'T2', 10, 3),
   ('B1.1', 'T2', 15, 4), ('B1.10', 'T2', 15, 5),
   ('B2.1', 'T2', 6, 6), ('B2.2', 'T2', 4, 7), ('B2.3', 'T2', 4, 8), ('B2.4', 'T2', 8, 9),
   ('B2.5', 'T2', 4, 10), ('B2.6', 'T2', 4, 11), ('B2.7', 'T2', 4, 12),
-  -- TẦNG 4 — 2 bàn/khu, 80 khách (đặt nguyên khối, chưa chia nhỏ)
   ('STT', 'T4', 30, 1), ('STN', 'T4', 50, 2)
 on conflict (code) do nothing;
 
--- Danh mục MẪU ĐỀ XUẤT (chưa được nhà hàng xác nhận) — quản lý có thể sửa/thêm/ẩn trong ứng dụng.
 insert into public.lookups (kind, label, sort_order) values
   ('source', 'Khách quen / giới thiệu', 1), ('source', 'Điện thoại', 2), ('source', 'Zalo', 3),
   ('source', 'Facebook', 4), ('source', 'Khách vãng lai', 5), ('source', 'Đối tác / công ty', 6),
@@ -1217,3 +1138,4 @@ insert into public.lookups (kind, label, sort_order) values
   ('purpose', 'Họp mặt bạn bè', 4), ('purpose', 'Liên hoan / tất niên', 5), ('purpose', 'Khác', 6),
   ('deposit_method', 'Tiền mặt', 1), ('deposit_method', 'Chuyển khoản', 2), ('deposit_method', 'Thẻ', 3)
 on conflict (kind, label) do nothing;
+
