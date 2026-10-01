@@ -1,4 +1,5 @@
 "use client";
+import { DateInput, TimeInput } from "./DateTimeInputs";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -337,8 +338,8 @@ export function BookingForm({ booking, prefill }: { booking?: Booking; prefill?:
             </Field>
             <Field label="Ngày giờ khách đặt bàn / đặt tiệc" hint="Thời điểm khách báo đặt (khác với lúc nhân viên nhập vào hệ thống).">
               <div className="flex gap-2">
-                <input type="date" aria-label="Ngày khách đặt" className="input" value={f.bookedDate} onChange={(e) => set("bookedDate", e.target.value)} />
-                <input type="time" aria-label="Giờ khách đặt" className="input w-36" value={f.bookedTime} onChange={(e) => set("bookedTime", e.target.value)} />
+                <DateInput aria-label="Ngày khách đặt" className="" value={f.bookedDate} onChange={(v) => set("bookedDate", v)} />
+                <TimeInput aria-label="Giờ khách đặt" className="w-36" value={f.bookedTime} onChange={(v) => set("bookedTime", v)} />
               </div>
             </Field>
           </div>
@@ -349,13 +350,13 @@ export function BookingForm({ booking, prefill }: { booking?: Booking; prefill?:
           <h2 id="g2" className="mb-3 text-lg font-bold text-leaf-900">2. Thời gian &amp; bàn</h2>
           <div className="grid gap-3 sm:grid-cols-4">
             <Field label="Ngày diễn ra tiệc" htmlFor="date" required className="sm:col-span-2">
-              <input id="date" type="date" className="input" value={f.date} onChange={(e) => set("date", e.target.value)} />
+              <DateInput id="date" className="" value={f.date} onChange={(v) => set("date", v)} />
             </Field>
             <Field label="Giờ bắt đầu" htmlFor="from" required>
-              <input id="from" type="time" step={900} className="input" value={f.from} onChange={(e) => set("from", e.target.value)} />
+              <TimeInput id="from" className="" value={f.from} onChange={(v) => set("from", v)} />
             </Field>
             <Field label="Giờ kết thúc dự kiến" htmlFor="to" required error={errors.to}>
-              <input id="to" type="time" step={900} className="input" value={f.to} onChange={(e) => set("to", e.target.value)} />
+              <TimeInput id="to" className="" value={f.to} onChange={(v) => set("to", v)} />
             </Field>
           </div>
           <label className="mt-2 flex items-center gap-2 text-sm"><input type="checkbox" checked={f.nextDay} onChange={(e) => set("nextDay", e.target.checked)} className="h-5 w-5" /> Kết thúc sang ngày hôm sau</label>
@@ -433,7 +434,7 @@ export function BookingForm({ booking, prefill }: { booking?: Booking; prefill?:
               </select>
             </Field>
             <Field label="Ngày cọc" htmlFor="depositDate">
-              <input id="depositDate" type="date" className="input" value={f.depositDate} onChange={(e) => set("depositDate", e.target.value)} />
+              <DateInput id="depositDate" className="" value={f.depositDate} onChange={(v) => set("depositDate", v)} />
             </Field>
           </div>
           <p className="hint">{f.deposit ? `Đã ghi nhận cọc ${fmtMoney(Number(digits(f.deposit)))}. ` : "Chưa cọc. "}Tiền cọc chỉ để theo dõi — không tính là doanh thu; ứng dụng không xử lý thanh toán hay hoàn tiền khi hủy.</p>

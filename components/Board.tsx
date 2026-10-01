@@ -1,4 +1,5 @@
 "use client";
+import { DateInput, TimeInput } from "./DateTimeInputs";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -73,18 +74,18 @@ export function BoardClient({ board, date, from: fromProp, to: toProp }: { board
           <span className="label">Ngày</span>
           <div className="flex items-center gap-1">
             <button className="btn-secondary px-2" aria-label="Ngày trước" onClick={() => goto(addDays(date, -1))}><ChevronLeft size={20} /></button>
-            <input type="date" className="input w-auto" value={date} onChange={(e) => e.target.value && goto(e.target.value)} aria-label="Ngày xem" />
+            <DateInput className="w-44" value={date} onChange={(v) => v && goto(v)} aria-label="Ngày xem" />
             <button className="btn-secondary px-2" aria-label="Ngày sau" onClick={() => goto(addDays(date, 1))}><ChevronRight size={20} /></button>
             {!isToday && <button className="btn-ghost btn-sm" onClick={() => goto(todayVn())}>Hôm nay</button>}
           </div>
         </div>
         <div>
           <label className="label" htmlFor="from">Từ giờ</label>
-          <input id="from" type="time" step={900} className="input w-36" value={from} onChange={(e) => e.target.value && setWindow(e.target.value, to)} />
+          <TimeInput id="from" className="w-36" value={from} onChange={(v) => v && setWindow(v, to)} />
         </div>
         <div>
           <label className="label" htmlFor="to">Đến giờ</label>
-          <input id="to" type="time" step={900} className="input w-36" value={to} onChange={(e) => e.target.value && setWindow(from, e.target.value)} />
+          <TimeInput id="to" className="w-36" value={to} onChange={(v) => v && setWindow(from, v)} />
         </div>
         <div className="flex flex-wrap gap-1.5">
           {isToday && preset("Bây giờ", nowStart, nowEnd)}

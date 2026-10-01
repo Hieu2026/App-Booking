@@ -1,4 +1,5 @@
 "use client";
+import { DateInput } from "./DateTimeInputs";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -86,8 +87,8 @@ export function SearchClient({ params, result, pageSize, floors, staff, lookups 
           </select>
         </div>
         <div className="grid grid-cols-2 gap-2">
-          <div><label className="label" htmlFor="df">Từ ngày</label><input id="df" type="date" className="input" value={df} onChange={(e) => setDf(e.target.value)} /></div>
-          <div><label className="label" htmlFor="dt">Đến ngày</label><input id="dt" type="date" className="input" value={dt} onChange={(e) => setDt(e.target.value)} /></div>
+          <div><label className="label" htmlFor="df">Từ ngày</label><DateInput id="df" className="" value={df} onChange={(v) => setDf(v)} /></div>
+          <div><label className="label" htmlFor="dt">Đến ngày</label><DateInput id="dt" className="" value={dt} onChange={(v) => setDt(v)} /></div>
         </div>
         <div>
           <label className="label" htmlFor="floor">Tầng</label>

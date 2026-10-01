@@ -1,4 +1,5 @@
 "use client";
+import { TimeInput } from "./DateTimeInputs";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
@@ -201,8 +202,8 @@ export function SettingsAdmin({ settings }: { settings: Settings }) {
     <form className="card max-w-xl space-y-3" onSubmit={async (e) => { e.preventDefault(); setBusy(true); await run(() => saveSettingsAction({ open: s.open, close: s.close, buffer: Number(s.buffer), duration: Number(s.duration) }), "Đã lưu cấu hình."); setBusy(false); }}>
       <p className="text-sm text-amber-900 rounded-xl bg-amber-50 p-3">Các giá trị mặc định (đệm dọn bàn 0 phút, thời lượng gợi ý 120 phút) là <b>đề xuất</b>, chưa được nhà hàng xác nhận.</p>
       <div className="grid grid-cols-2 gap-3">
-        <Field label="Giờ mở cửa" htmlFor="so"><input id="so" type="time" className="input" value={s.open} onChange={(e) => setS({ ...s, open: e.target.value })} /></Field>
-        <Field label="Giờ đóng cửa" htmlFor="sc"><input id="sc" type="time" className="input" value={s.close} onChange={(e) => setS({ ...s, close: e.target.value })} /></Field>
+        <Field label="Giờ mở cửa" htmlFor="so"><TimeInput id="so" className="" value={s.open} onChange={(v) => setS({ ...s, open: v })} /></Field>
+        <Field label="Giờ đóng cửa" htmlFor="sc"><TimeInput id="sc" className="" value={s.close} onChange={(v) => setS({ ...s, close: v })} /></Field>
       </div>
       <Field label="Khoảng đệm dọn bàn giữa hai lượt (phút)" htmlFor="sb" hint="Áp dụng cho các lượt đặt tạo/sửa từ nay về sau; lượt đã có giữ nguyên khoảng đệm cũ cho đến khi được sửa giờ.">
         <input id="sb" className="input" inputMode="numeric" value={s.buffer} onChange={(e) => setS({ ...s, buffer: e.target.value.replace(/\D/g, "") })} />

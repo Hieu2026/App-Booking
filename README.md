@@ -159,6 +159,6 @@ Chi tiết cách chạy, kết quả thực tế và **những gì chưa kiểm 
 ## 10. Giới hạn đã biết
 
 * Chưa có POS, gọi món tại bàn, kho, kế toán, cổng đặt bàn công khai (ngoài phạm vi).
-* Ô ngày/giờ dùng bộ chọn của trình duyệt: hiển thị theo ngôn ngữ trình duyệt (trình duyệt tiếng Việt → dd/mm/yyyy, 24 giờ).
+* Ngày luôn hiển thị dd/mm/yyyy và giờ 24 giờ (HH:mm) trên mọi máy (ô nhập riêng, không phụ thuộc ngôn ngữ trình duyệt); có thể gõ liền chữ số (ví dụ 15062041) hoặc bấm biểu tượng lịch.
 * Khoảng đệm dọn bàn đổi sau này chỉ áp dụng cho lượt tạo/sửa giờ từ lúc đó.
 * Lịch theo giờ hiển thị một ngày mỗi lần; không có lịch tháng.
