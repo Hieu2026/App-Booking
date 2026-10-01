@@ -34,7 +34,7 @@ Mở địa chỉ web của nhà hàng trên trình duyệt → đăng nhập b�
 * **Hoàn tất phục vụ** → bàn sang *Chờ dọn* → dọn xong bấm **Xác nhận sẵn sàng** ở thẻ bàn.
 * **Đổi giờ / thêm – bớt bàn:** sửa trực tiếp rồi *Lưu thay đổi*. **Đổi bàn nhanh:** *Chuyển bàn …*.
 * **Hủy đặt bàn:** cần nhập lý do và xác nhận; lượt đặt vẫn được giữ trong lịch sử. **Khách không đến:** nhả bàn cho người khác.
-* **Gửi xác nhận cho khách:** ở cuối trang lượt đặt, kiểm tra nội dung rồi bấm *SMS / Zalo / Email*. Ứng dụng chỉ mở sẵn tin trên máy bạn — bạn bấm gửi.
+* **Gửi xác nhận cho khách:** ở cuối trang lượt đặt bấm **Tải ảnh PNG** hoặc **Tải file PDF** → file `xac-nhan-KH-xxxxx` được tải về máy → đính kèm vào Zalo / SMS / email gửi khách. Trên điện thoại có thể bấm **Chia sẻ ảnh**. Hãy lưu lượt đặt trước (phiếu lấy từ thông tin đã lưu).
 * **Lịch sử thay đổi** (ai sửa gì, lúc nào) nằm cuối trang lượt đặt.
 
 ## 4. Khi có thông báo đỏ / vàng

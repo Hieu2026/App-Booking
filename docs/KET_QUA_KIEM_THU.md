@@ -7,7 +7,7 @@ Ngày chạy: 01/10/2026 · Node 22 · PostgreSQL 16.14 cục bộ · Chromium (
 | Kiểu dữ liệu | `npm run typecheck` | Đạt, 0 lỗi |
 | Lint | `npm run lint` | Đạt, 0 lỗi, 0 cảnh báo |
 | Cơ sở dữ liệu thật (35 test) + hàm thuần (8 test) | `npm run test` | **43/43 đạt** |
-| Trình duyệt thật, 4 phiên song song, CSDL thật (21 test) | `npm run test:e2e` | **21/21 đạt** |
+| Trình duyệt thật, 4 phiên song song, CSDL thật (22 test) | `npm run test:e2e` | **22/22 đạt** (test phiếu PNG/PDF chạy riêng sau cùng, đạt) |
 | Build production | `npm run build` | Thành công |
 
 Ảnh chụp từ lần chạy: [laptop](screenshots/laptop-ban.png) · [tablet](screenshots/tablet-ban.png) · [điện thoại](screenshots/dien-thoai-ban.png) · [danh sách/báo cáo](screenshots/laptop-danh-sach.png) · [biểu mẫu đặt bàn](screenshots/laptop-dat-moi.png).
@@ -45,7 +45,7 @@ Các hành vi khác đã có kiểm thử: khoảng `[bắt đầu, kết thúc)
 2. **Supabase Auth / PostgREST / Realtime thật chưa được dùng.** Migration, RLS, quyền hàm, ràng buộc và đồng thời được kiểm thử trên **PostgreSQL 16 thật** với vai trò `anon`/`authenticated` và JWT claims giống cách PostgREST hoạt động. Trình duyệt tự động chạy qua công cụ mô phỏng nhỏ `tests/e2e/mini-supabase.mjs` (đăng nhập + gọi RPC; **chỉ để kiểm thử, không triển khai**). Lớp HTTP của PostgREST, GoTrue thật và việc đẩy tin **Realtime** chưa được chạy; ứng dụng có sẵn làm mới định kỳ (~20 giây, khi quay lại tab, khi có mạng lại) nên vẫn cập nhật nếu Realtime không hoạt động.
 3. **Migration chưa chạy bằng Supabase CLI/SQL Editor** mà bằng `psql` trên PostgreSQL 16 (Supabase dùng bản mới hơn một chút; các tính năng dùng ở đây — `btree_gist`, `unaccent`, ràng buộc loại trừ, `SECURITY DEFINER` — đều có sẵn).
 4. Trình duyệt thật trên máy tablet/điện thoại, Safari, Firefox: chưa thử (chỉ Chromium giả lập khung hình). Định dạng ô ngày/giờ phụ thuộc ngôn ngữ trình duyệt.
-5. Liên kết SMS / Zalo / Email: mới kiểm tra nội dung và địa chỉ liên kết, chưa mở thử trên thiết bị thật (Zalo không nhận sẵn nội dung — ứng dụng tự sao chép để dán).
+5. Phiếu xác nhận PNG/PDF: đã kiểm tra tải về đúng định dạng (PNG, PDF mở được, 1 trang) và đã xem ảnh; chưa thử nút “Chia sẻ” và việc đính kèm trên Zalo/SMS thật. Liên kết SMS/Zalo/Email mới kiểm tra địa chỉ liên kết.
 6. Lệnh sao lưu/phục hồi trong `docs/SAO_LUU_PHUC_HOI.md` chưa chạy với dự án Supabase thật.
 7. Chưa đo tải/hiệu năng với dữ liệu lớn (nhiều năm, hàng chục nghìn lượt đặt). Xuất Excel giới hạn 20.000 lượt mỗi lần.
 

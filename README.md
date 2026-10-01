@@ -47,7 +47,7 @@ Trạng thái lượt đặt: *Chờ xác nhận → Đã xác nhận → Đã �
 * Danh mục *nguồn khách, mục đích tiệc, phương thức cọc* là **mẫu đề xuất** (xem `supabase/seed.sql`), Quản lý sửa/thêm/ẩn trong ứng dụng.
 * Màu kem – xanh lá trầm – cam đất và logo chữ “Khoái” là phương án đề xuất, không phải nhận diện chính thức.
 * Tiền cọc **chỉ để theo dõi**: không phải doanh thu, không xử lý thanh toán/hoàn tiền khi hủy.
-* “Gửi xác nhận”: ứng dụng soạn sẵn tin nhắn và mở **SMS / Zalo / Email** trên máy nhân viên; **không tự gửi** (tự gửi cần nhà cung cấp SMS/Zalo OA và khóa bí mật, nằm ngoài phạm vi phiên bản đầu).
+* “Gửi xác nhận”: ứng dụng **tạo phiếu xác nhận dạng ảnh PNG hoặc file PDF** (ngay trên trình duyệt, từ thông tin đã lưu) để nhân viên đính kèm vào tin nhắn Zalo/SMS/email gửi khách. Có thêm lời nhắn soạn sẵn và nút mở SMS/Zalo/Email; **không tự gửi**. Phiếu chỉ chứa thông tin có trong lượt đặt (không tự thêm địa chỉ/số điện thoại nhà hàng).
 * Sheet “Trường TT” nhắc cài trên máy local; theo yêu cầu hiện tại, ứng dụng chạy **online trên Vercel + Supabase**.
 * Hai vai trò: **Lễ tân/Sales** và **Quản lý**. Chỉ Quản lý ghi đè cảnh báo vượt sức chứa/ngoài giờ (kèm lý do); **không ai** ghi đè được trùng lịch.
 * Danh sách bàn lấy từ “Cấu hình NH Khoái.xlsx”: **29 bàn/khu, 229 chỗ** (Tầng trệt 15/60, Tầng 2 12/89, Tầng 4 2/80). Giao diện hiển thị lưới theo tầng — **không phải bản vẽ mặt bằng**.

@@ -128,3 +128,24 @@ test("soạn tin nhắn xác nhận cho khách", async ({ page }) => {
   await expect(page.getByRole("link", { name: /Tin nhắn SMS/ })).toHaveAttribute("href", /^sms:0988888888\?body=/);
   await expect(page.getByRole("link", { name: /Zalo/ })).toHaveAttribute("href", "https://zalo.me/84988888888");
 });
+
+test("tạo phiếu xác nhận dạng PNG và PDF để đính kèm", async ({ page }) => {
+  await login(page, USERS.le1);
+  await page.goto("/dat-ban?basis=event&q=Khách Hai Bàn");
+  await page.getByRole("link", { name: /KH-/ }).first().click();
+  const readFile = async (name: string) => {
+    const [dl] = await Promise.all([page.waitForEvent("download"), page.getByRole("button", { name }).click()]);
+    const path = await dl.path();
+    return { name: dl.suggestedFilename(), buf: (await import("node:fs")).readFileSync(path!) };
+  };
+  const png = await readFile("Tải ảnh PNG");
+  expect(png.name).toMatch(/^xac-nhan-KH-\d{5}\.png$/);
+  expect([...png.buf.subarray(0, 4)]).toEqual([0x89, 0x50, 0x4e, 0x47]);
+  const pdf = await readFile("Tải file PDF");
+  expect(pdf.name).toMatch(/\.pdf$/);
+  expect(pdf.buf.subarray(0, 5).toString()).toBe("%PDF-");
+  expect(pdf.buf.subarray(-6).toString()).toContain("%%EOF");
+  (await import("node:fs")).mkdirSync(".test-artifacts", { recursive: true });
+  (await import("node:fs")).writeFileSync(".test-artifacts/phieu.png", png.buf);
+  (await import("node:fs")).writeFileSync(".test-artifacts/phieu.pdf", pdf.buf);
+});

@@ -1,7 +1,8 @@
 "use client";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Copy, Mail, MessageCircle, Smartphone } from "lucide-react";
+import { Copy, FileText, Image as ImageIcon, Mail, MessageCircle, Share2, Smartphone } from "lucide-react";
+import { cardPdf, cardPng, fileBase } from "@/lib/confirmCard";
 import { fmtDate, fmtMoney, fmtTime } from "@/lib/time";
 import type { Booking } from "@/lib/types";
 
@@ -33,10 +34,30 @@ export function ConfirmMessage({ booking }: { booking: Booking }) {
     try { await navigator.clipboard.writeText(shown); toast.success("Đã sao chép tin nhắn."); }
     catch { toast.error("Không sao chép được — hãy bôi đen và sao chép thủ công."); }
   };
+  const save = async (kind: "png" | "pdf", share = false) => {
+    try {
+      const blob = kind === "png" ? await cardPng(booking) : await cardPdf(booking);
+      const name = `${fileBase(booking)}.${kind}`;
+      const file = new File([blob], name, { type: blob.type });
+      if (share && navigator.canShare?.({ files: [file] })) { await navigator.share({ files: [file], title: `Xác nhận đặt bàn ${booking.code}` }); return; }
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+      toast.success(`Đã tạo file ${name}. Đính kèm file này vào tin nhắn gửi khách.`);
+    } catch (e: any) {
+      if (e?.name !== "AbortError") toast.error("Chưa tạo được file. Hãy thử lại.");
+    }
+  };
   return (
     <section className="card mx-auto max-w-4xl" aria-labelledby="confirm-msg">
       <h2 id="confirm-msg" className="mb-1 text-lg font-bold text-leaf-900">Gửi xác nhận cho khách</h2>
-      <p className="mb-2 text-sm text-stone-600">Kiểm tra / chỉnh nội dung, rồi bấm kênh muốn gửi. Ứng dụng mở sẵn tin nhắn trên máy bạn — nhân viên bấm gửi (ứng dụng không tự gửi).</p>
+      <p className="mb-2 text-sm text-stone-600">Tạo <b>phiếu xác nhận</b> dạng ảnh hoặc PDF từ thông tin đã lưu, rồi đính kèm vào tin nhắn Zalo / SMS / email gửi khách. Ứng dụng không tự gửi.</p>
+      <div className="mb-4 flex flex-wrap gap-2">
+        <button type="button" className="btn-primary" onClick={() => save("png")}><ImageIcon size={18} aria-hidden /> Tải ảnh PNG</button>
+        <button type="button" className="btn-primary" onClick={() => save("pdf")}><FileText size={18} aria-hidden /> Tải file PDF</button>
+        <button type="button" className="btn-secondary" onClick={() => save("png", true)}><Share2 size={18} aria-hidden /> Chia sẻ ảnh (điện thoại)</button>
+      </div>
+      <h3 className="mb-1 font-semibold">Lời nhắn kèm theo (tùy chọn)</h3>
       <textarea className="input font-mono text-sm" rows={9} value={shown} onChange={(e) => { setText(e.target.value); setEdited(true); }} aria-label="Nội dung tin nhắn xác nhận" />
       <div className="mt-3 flex flex-wrap gap-2">
         <button type="button" className="btn-secondary" onClick={copy}><Copy size={18} aria-hidden /> Sao chép</button>
