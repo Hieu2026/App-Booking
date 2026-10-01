@@ -1,4 +1,5 @@
--- Migration 0005: danh mục "Nhân viên tư vấn" cấu hình được + bổ sung nguồn khách BNI, TikTok, Website.
+-- Migration 0005: danh mục "Nhân viên tư vấn" cấu hình được + bổ sung nguồn khách BNI, TikTok, Website
+-- + thể loại / mục đích tiệc: Báo hỷ, Thôi nôi, Kỷ niệm, Sinh nhật, Tổng kết.
 -- An toàn khi chạy trên CSDL đã có dữ liệu: chỉ thêm cột/ràng buộc, thay hàm, thêm mục danh mục còn thiếu.
 -- Lượt đặt cũ (nếu có) vẫn hiển thị tên nhân viên tư vấn theo tài khoản cũ.
 
@@ -413,5 +414,6 @@ end $$;
 -- Danh mục mẫu (chạy lặp lại không tạo trùng, không ghi đè chỉnh sửa)
 insert into public.lookups (kind, label, sort_order) values
   ('source', 'BNI', 7), ('source', 'TikTok', 8), ('source', 'Website', 9),
+  ('purpose', 'Báo hỷ', 7), ('purpose', 'Thôi nôi', 8), ('purpose', 'Kỷ niệm', 9), ('purpose', 'Sinh nhật', 1), ('purpose', 'Tổng kết', 10),
   ('consultant', 'Lễ tân', 1), ('consultant', 'Khánh Hồng', 2), ('consultant', 'Cát Tường', 3), ('consultant', 'Uyên Hồ', 4)
 on conflict (kind, label) do nothing;

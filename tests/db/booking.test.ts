@@ -449,6 +449,9 @@ describe("Nhân viên tư vấn & nguồn khách (danh mục cấu hình đượ
   it("danh mục mẫu có đủ: nguồn BNI/TikTok/Website; tư vấn Lễ tân, Khánh Hồng, Cát Tường, Uyên Hồ", async () => {
     const src = (await sql("select label from lookups where kind='source'")).map((r: any) => r.label);
     expect(src).toEqual(expect.arrayContaining(["BNI", "TikTok", "Website"]));
+    const pur = (await sql("select label from lookups where kind='purpose'")).map((r: any) => r.label);
+    expect(pur).toEqual(expect.arrayContaining(["Báo hỷ", "Thôi nôi", "Kỷ niệm", "Sinh nhật", "Tổng kết"]));
+    expect(new Set(pur).size).toBe(pur.length);
     const con = (await sql("select label from lookups where kind='consultant' order by sort_order")).map((r: any) => r.label);
     expect(con).toEqual(["Lễ tân", "Khánh Hồng", "Cát Tường", "Uyên Hồ"]);
   });
