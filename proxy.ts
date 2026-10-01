@@ -3,10 +3,20 @@ import { NextResponse, type NextRequest } from "next/server";
 
 // Chặn mọi truy cập chưa đăng nhập (trang và API). Dữ liệu vẫn được bảo vệ thêm ở cơ sở dữ liệu bằng RLS.
 export async function proxy(request: NextRequest) {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+  if (!url || !key) {
+    // Thiếu cấu hình khi triển khai: báo rõ cách khắc phục thay vì lỗi chung.
+    return new NextResponse(
+      "Ứng dụng chưa được cấu hình: thiếu NEXT_PUBLIC_SUPABASE_URL hoặc NEXT_PUBLIC_SUPABASE_ANON_KEY. " +
+        "Vào Vercel → Settings → Environment Variables để thêm, rồi Redeploy.",
+      { status: 503, headers: { "content-type": "text/plain; charset=utf-8" } },
+    );
+  }
   let response = NextResponse.next({ request });
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL ?? "",
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "",
+    url,
+    key,
     {
       cookies: {
         getAll: () => request.cookies.getAll(),
