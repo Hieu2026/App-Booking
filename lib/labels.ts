@@ -2,8 +2,8 @@ import type { BookingStatus, TableOps } from "./types";
 
 export const BOOKING_STATUS: Record<BookingStatus, { label: string; cls: string }> = {
   pending: { label: "Chờ xác nhận", cls: "bg-amber-100 text-amber-900 ring-amber-300" },
-  confirmed: { label: "Đã xác nhận", cls: "bg-emerald-100 text-emerald-900 ring-emerald-300" },
-  arrived: { label: "Đã đến", cls: "bg-orange-100 text-orange-900 ring-orange-300" },
+  confirmed: { label: "Đã xác nhận", cls: "bg-fresh-100 text-fresh-900 ring-fresh-300" },
+  arrived: { label: "Đã đến", cls: "bg-coral-100 text-coral-900 ring-coral-300" },
   completed: { label: "Hoàn tất", cls: "bg-stone-200 text-stone-700 ring-stone-300" },
   cancelled: { label: "Đã hủy", cls: "bg-stone-100 text-stone-500 ring-stone-300 line-through" },
   no_show: { label: "Không đến", cls: "bg-rose-100 text-rose-800 ring-rose-300" },

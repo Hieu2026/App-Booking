@@ -10,8 +10,8 @@ Mở địa chỉ web của nhà hàng trên trình duyệt → đăng nhập b�
 |---|---|---|
 | Xanh lá | Trống | Không ai đặt trong khung giờ này |
 | **Đỏ** | Có khách đặt | Đã có lượt đặt trong khung giờ — thẻ ghi giờ, tên khách, số khách |
-| Cam | Đang phục vụ | Khách đang ngồi (nếu quá giờ dự kiến sẽ ghi “quá giờ” + cảnh báo lượt kế tiếp) |
-| Tím | Chờ dọn | Khách vừa xong, chờ nhân viên dọn |
+| Cam san hô | Đang phục vụ | Khách đang ngồi (nếu quá giờ dự kiến sẽ ghi “quá giờ” + cảnh báo lượt kế tiếp) |
+| Xanh dương | Chờ dọn | Khách vừa xong, chờ nhân viên dọn |
 | Xám | Tạm ngưng | Bàn không nhận khách (hỏng, sửa chữa…) |
 
 3. Lọc theo **Tầng, Sức chứa, Trạng thái**. Đổi cách xem: **Lưới bàn · Danh sách đặt bàn · Lịch theo giờ**.

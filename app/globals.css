@@ -20,6 +20,25 @@
   --color-clay-500: #2b2523;
   --color-clay-600: #1a1614;
   --color-clay-700: #120f0e;
+  /* Màu phụ thương hiệu: xanh lá #70bf54 (trống), cam san hô #f47a63 (đang phục vụ), xanh dương #4aa6de (chờ dọn) */
+  --color-fresh-50: #f1f9ee;
+  --color-fresh-100: #dff2d8;
+  --color-fresh-300: #a6d896;
+  --color-fresh-500: #70bf54;
+  --color-fresh-700: #3d7a28;
+  --color-fresh-800: #2f6420;
+  --color-fresh-900: #234a18;
+  --color-coral-50: #fff3f0;
+  --color-coral-100: #fde2dc;
+  --color-coral-300: #f9b4a6;
+  --color-coral-500: #f47a63;
+  --color-coral-700: #b8402b;
+  --color-coral-900: #7a2616;
+  --color-ocean-50: #eef7fd;
+  --color-ocean-100: #d9ecf9;
+  --color-ocean-400: #4aa6de;
+  --color-ocean-700: #1f6fa3;
+  --color-ocean-900: #134566;
   --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
 }
 

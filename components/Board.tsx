@@ -97,9 +97,9 @@ export function BoardClient({ board, date, from: fromProp, to: toProp }: { board
 
       {/* Thống kê */}
       <section className="grid grid-cols-2 gap-3 lg:grid-cols-5" aria-label="Thống kê">
-        <Stat label="Bàn trống" sub={`trong ${from}–${to}`} value={stats.free} cls="text-emerald-700" />
+        <Stat label="Bàn trống" sub={`trong ${from}–${to}`} value={stats.free} cls="text-fresh-700" />
         <Stat label="Bàn có lịch" sub={`trong ${from}–${to}`} value={stats.booked} cls="text-red-700" />
-        <Stat label="Đang phục vụ" sub="hiện tại" value={stats.serving} cls="text-orange-700" />
+        <Stat label="Đang phục vụ" sub="hiện tại" value={stats.serving} cls="text-coral-700" />
         <Stat label="Lượt đặt trong ngày" sub="không tính đã hủy / không đến" value={stats.bookings} cls="text-leaf-800" />
         <Stat label="Khách dự kiến" sub="tổng số khách trong ngày" value={stats.guests} cls="text-leaf-800" />
       </section>
@@ -292,7 +292,7 @@ function Timeline({ views, date, now }: { views: TableView[]; date: string; now:
                 const e = Math.min((new Date(b.end_at).getTime() - dayStart) / 60000, hi);
                 return (
                   <Link key={b.id} href={`/dat-ban/${b.id}`} title={`${b.code} · ${b.customer_name ?? "Khách vãng lai"} · ${BOOKING_STATUS[b.status].label}`}
-                    className={`absolute inset-y-1 overflow-hidden rounded-md border px-1.5 text-xs font-semibold leading-tight ${b.status === "completed" ? "border-stone-300 bg-stone-200 text-stone-700" : b.status === "arrived" ? "border-orange-500 bg-orange-100 text-orange-900" : "border-red-600 bg-red-100 text-red-900"}`}
+                    className={`absolute inset-y-1 overflow-hidden rounded-md border px-1.5 text-xs font-semibold leading-tight ${b.status === "completed" ? "border-stone-300 bg-stone-200 text-stone-700" : b.status === "arrived" ? "border-coral-500 bg-coral-100 text-coral-900" : "border-red-600 bg-red-100 text-red-900"}`}
                     style={{ left: `${((s - lo) / span) * 100}%`, width: `${((e - s) / span) * 100}%` }}>
                     {fmtTime(b.start_at)} {b.customer_name ?? "Vãng lai"}
                   </Link>

@@ -8,10 +8,10 @@ export const STATE_LABEL: Record<TableState, string> = {
 };
 /** Màu thẻ bàn — luôn đi kèm chữ. Bàn có khách đặt tô đỏ. */
 export const STATE_CLS: Record<TableState, string> = {
-  free: "border-emerald-500 bg-emerald-50 text-emerald-900",
+  free: "border-fresh-500 bg-fresh-50 text-fresh-900",
   booked: "border-red-600 bg-red-100 text-red-900",
-  serving: "border-orange-500 bg-orange-100 text-orange-900",
-  cleaning: "border-violet-400 bg-violet-50 text-violet-900",
+  serving: "border-coral-500 bg-coral-100 text-coral-900",
+  cleaning: "border-ocean-400 bg-ocean-50 text-ocean-900",
   suspended: "border-stone-400 bg-stone-200 text-stone-600",
 };
 

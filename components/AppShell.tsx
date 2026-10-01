@@ -33,7 +33,7 @@ function Inner({ name, role, children }: { name: string; role: string; children:
           <div className="ml-auto flex items-center gap-2">
             <Link href="/dat-ban/moi" className="btn-accent"><Plus size={20} aria-hidden /> Đặt bàn mới</Link>
             <span className="hidden items-center gap-1 text-xs text-stone-500 md:flex" title={realtime ? "Đang nhận cập nhật tức thời" : "Tự làm mới định kỳ"}>
-              <span className={`h-2 w-2 rounded-full ${!online ? "bg-red-500" : realtime ? "bg-emerald-500" : "bg-amber-500"}`} />
+              <span className={`h-2 w-2 rounded-full ${!online ? "bg-red-500" : realtime ? "bg-fresh-500" : "bg-amber-500"}`} />
               {!online ? "Mất mạng" : realtime ? "Trực tiếp" : "Làm mới định kỳ"}
             </span>
             <div className="hidden text-right text-sm leading-tight sm:block">

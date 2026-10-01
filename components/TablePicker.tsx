@@ -44,11 +44,11 @@ export function TablePicker({ availability, loading, error, selected, onToggle, 
                 const servingLate = t.serving && startIso && new Date(t.serving.end_at).getTime() > new Date(startIso).getTime();
                 const tight = t.next_start && endIso && new Date(t.next_start).getTime() - new Date(endIso).getTime() < 30 * 60000;
                 let note = "Trống";
-                let tone = "border-emerald-400 bg-emerald-50 text-emerald-900";
+                let tone = "border-fresh-500 bg-fresh-50 text-fresh-900";
                 if (suspended) { note = "Tạm ngưng"; tone = "border-stone-300 bg-stone-100 text-stone-500"; }
                 else if (conflict) { note = `Đã đặt ${fmtTime(conflict.start_at)}–${fmtTime(conflict.end_at)} · ${conflict.booking_code}`; tone = "border-red-500 bg-red-100 text-red-900"; }
-                else if (notReady) { note = t.ops_status === "serving" ? "Đang phục vụ" : "Chờ dọn"; tone = "border-orange-400 bg-orange-50 text-orange-900"; }
-                else if (servingLate) { note = `Đang phục vụ đến ${fmtTime(t.serving!.end_at)}`; tone = "border-orange-400 bg-orange-50 text-orange-900"; }
+                else if (notReady) { note = t.ops_status === "serving" ? "Đang phục vụ" : "Chờ dọn"; tone = "border-coral-500 bg-coral-50 text-coral-900"; }
+                else if (servingLate) { note = `Đang phục vụ đến ${fmtTime(t.serving!.end_at)}`; tone = "border-coral-500 bg-coral-50 text-coral-900"; }
                 else if (tight) { note = `Trống · lượt kế tiếp ${fmtTime(t.next_start!)}`; tone = "border-amber-400 bg-amber-50 text-amber-900"; }
                 return (
                   <button key={t.id} type="button" disabled={disabled || blocked} aria-pressed={sel} data-testid={`pick-${t.code}`}

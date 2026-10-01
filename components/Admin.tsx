@@ -47,7 +47,7 @@ export function AccountsAdmin({ profiles }: { profiles: Profile[] }) {
                 <td className="td font-semibold">{p.full_name}{p.id === ctx.me.id && <span className="text-xs text-stone-500"> (bạn)</span>}</td>
                 <td className="td">{p.email}</td>
                 <td className="td">{p.role === "manager" ? "Quản lý" : "Lễ tân / Sales"}</td>
-                <td className="td">{p.active ? <span className="chip bg-emerald-100 text-emerald-900 ring-emerald-300">Đang hoạt động</span> : <span className="chip bg-stone-200 text-stone-600 ring-stone-300">Đã khóa</span>}</td>
+                <td className="td">{p.active ? <span className="chip bg-fresh-100 text-fresh-900 ring-fresh-300">Đang hoạt động</span> : <span className="chip bg-stone-200 text-stone-600 ring-stone-300">Đã khóa</span>}</td>
                 <td className="td text-right"><button className="btn-secondary btn-sm" onClick={() => { setEdit(p); setPw(""); }}>Sửa</button></td>
               </tr>
             ))}
