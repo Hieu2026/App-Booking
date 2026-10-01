@@ -28,6 +28,20 @@ test("màn hình bàn: đủ 29 bàn, tổng từng tầng, bộ lọc, thống 
   await page.getByLabel("Đến giờ").fill("18:30");
   await expect(page.getByTestId("table-B1.1")).toHaveAttribute("data-state", "booked");
 
+  // màu theo tầng: trệt #70bf54 (fresh), tầng 2 #f47a63 (coral), tầng 4 #4aa6de (ocean)
+  await expect(page.getByTestId("table-A1")).toHaveClass(/border-fresh-500/);
+  await expect(page.getByTestId("table-A1")).toHaveClass(/border-l-fresh-500/);
+  await expect(page.getByTestId("table-VIP 1")).toHaveClass(/border-coral-500/);
+  await expect(page.getByTestId("table-STT")).toHaveClass(/border-ocean-400/);
+  // bàn có khách đặt ở tầng 2: nền đỏ nhưng viền trái vẫn là màu tầng 2
+  await expect(page.getByTestId("table-B1.1")).toHaveClass(/border-l-coral-500/);
+  await expect(page.getByTestId("table-B1.1")).toHaveClass(/border-red-600/);
+  const colors = async (id: string) => page.getByTestId(id).evaluate((el) => { const c = getComputedStyle(el); return [c.borderTopColor, c.borderLeftColor, c.backgroundColor]; });
+  expect((await colors("table-A1"))[0]).toBe("rgb(112, 191, 84)");       // #70bf54
+  expect((await colors("table-VIP 1"))[0]).toBe("rgb(244, 122, 99)");     // #f47a63
+  expect((await colors("table-STT"))[0]).toBe("rgb(74, 166, 222)");       // #4aa6de
+  expect((await colors("table-B1.1"))[1]).toBe("rgb(244, 122, 99)");      // viền trái tầng 2
+
   // thống kê: 27 trống, 2 có lịch; 1 lượt, 28 khách
   await page.getByRole("button", { name: "Cả ngày" }).click();
   await expect(page.getByLabel("Thống kê")).toContainText("27");

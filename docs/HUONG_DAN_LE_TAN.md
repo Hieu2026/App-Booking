@@ -4,18 +4,19 @@ Mở địa chỉ web của nhà hàng trên trình duyệt → đăng nhập b�
 
 ## 1. Xem bàn nào còn trống
 1. Màn hình đầu tiên là **Bàn hôm nay**. Chọn **ngày**, **từ giờ – đến giờ** khách cần (hoặc bấm nhanh *Bây giờ / Cả ngày / Trưa / Tối*).
-2. Mỗi thẻ bàn có **chữ + màu** (luôn tính theo khung giờ bạn chọn):
+2. **Màu theo tầng** (dải màu bên trái thẻ và tiêu đề tầng): **Tầng trệt xanh lá**, **Tầng 2 cam san hô**, **Tầng 4 xanh dương**.
+3. **Màu theo trạng thái** (luôn kèm chữ trên thẻ, tính theo khung giờ bạn chọn):
 
-| Màu | Chữ trên thẻ | Nghĩa |
+| Màu thẻ | Chữ trên thẻ | Nghĩa |
 |---|---|---|
-| Xanh lá | Trống | Không ai đặt trong khung giờ này |
+| Nền nhạt cùng màu tầng | Trống | Không ai đặt trong khung giờ này |
 | **Đỏ** | Có khách đặt | Đã có lượt đặt trong khung giờ — thẻ ghi giờ, tên khách, số khách |
-| Cam san hô | Đang phục vụ | Khách đang ngồi (nếu quá giờ dự kiến sẽ ghi “quá giờ” + cảnh báo lượt kế tiếp) |
-| Xanh dương | Chờ dọn | Khách vừa xong, chờ nhân viên dọn |
+| Vàng | Đang phục vụ | Khách đang ngồi (nếu quá giờ dự kiến sẽ ghi “quá giờ” + cảnh báo lượt kế tiếp) |
+| Tím | Chờ dọn | Khách vừa xong, chờ nhân viên dọn |
 | Xám | Tạm ngưng | Bàn không nhận khách (hỏng, sửa chữa…) |
 
-3. Lọc theo **Tầng, Sức chứa, Trạng thái**. Đổi cách xem: **Lưới bàn · Danh sách đặt bàn · Lịch theo giờ**.
-4. Bấm vào một bàn → xem **lịch trong ngày**, **tạo lượt đặt cho bàn này**, *Xác nhận sẵn sàng* (khi chờ dọn), *Tạm ngưng / Mở lại bàn*.
+4. Lọc theo **Tầng, Sức chứa, Trạng thái**. Đổi cách xem: **Lưới bàn · Danh sách đặt bàn · Lịch theo giờ**.
+5. Bấm vào một bàn → xem **lịch trong ngày**, **tạo lượt đặt cho bàn này**, *Xác nhận sẵn sàng* (khi chờ dọn), *Tạm ngưng / Mở lại bàn*.
 
 > Lưu ý: lưới chỉ là danh sách bàn theo tầng, **không phải bản vẽ mặt bằng**.
 

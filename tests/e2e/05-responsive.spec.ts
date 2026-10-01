@@ -22,7 +22,7 @@ for (const s of SIZES) {
     for (const [name, url] of pages) {
       await page.goto(url);
       await page.waitForLoadState("networkidle");
-      await page.screenshot({ path: `.test-artifacts/screens/${s.name}-${name}.png`, fullPage: false });
+      await page.screenshot({ path: `.test-artifacts/screens/${s.name}-${name}.png`, fullPage: name === "ban" });
       const over = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
       expect(over, `${name}: trang bị cuộn ngang ${over}px`).toBeLessThanOrEqual(1);
     }

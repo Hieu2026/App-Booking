@@ -146,7 +146,8 @@ test("khách vãng lai → đang phục vụ → hoàn tất → chờ dọn →
 
   await page.goto("/");
   await expect(page.getByTestId("table-A1")).toHaveAttribute("data-state", "serving");
-  await expect(page.getByTestId("table-A1")).toContainText("quá giờ");   // quá giờ dự kiến mà chưa kết thúc vẫn đang phục vụ
+  await expect(page.getByTestId("table-A1")).toContainText("quá giờ");
+  await page.screenshot({ path: ".test-artifacts/ban-trang-thai.png" });   // quá giờ dự kiến mà chưa kết thúc vẫn đang phục vụ
 
   await page.goto(url);
   await page.getByRole("button", { name: "Hoàn tất phục vụ" }).click();

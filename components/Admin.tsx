@@ -8,6 +8,7 @@ import { EmptyState, Field, Modal, useRun } from "./ui";
 import { createStaffAction, resetPasswordAction, saveLookupAction, saveSettingsAction, saveTableAction, setProfileAction } from "@/app/actions";
 import { ACTION_LABEL, TABLE_OPS } from "@/lib/labels";
 import { fmtDateTime } from "@/lib/time";
+import { floorStyle } from "@/lib/board";
 import type { Floor, Lookup, Settings } from "@/lib/types";
 
 export function AdminTabs() {
@@ -121,7 +122,7 @@ export function TablesAdmin({ tables, floors }: { tables: TableRow[]; floors: Fl
         const list = tables.filter((t) => t.floor_code === fl.code);
         return (
           <section key={fl.code} className="card !p-0 overflow-x-auto">
-            <h2 className="bg-cream-100 px-4 py-2 font-bold">{fl.name} — {list.filter((t) => t.active).length} bàn, {list.filter((t) => t.active).reduce((s, t) => s + t.capacity, 0)} chỗ</h2>
+            <h2 className={`border-l-[10px] bg-cream-100 px-4 py-2 font-bold ${floorStyle(fl.code).leftBar}`}>{fl.name} — {list.filter((t) => t.active).length} bàn, {list.filter((t) => t.active).reduce((s, t) => s + t.capacity, 0)} chỗ</h2>
             <table className="w-full min-w-[520px]"><tbody className="divide-y divide-cream-200">
               {list.map((t) => (
                 <tr key={t.id} className={t.active ? "" : "opacity-50"}>

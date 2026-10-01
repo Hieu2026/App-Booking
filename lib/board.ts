@@ -6,13 +6,34 @@ export type TableState = "free" | "booked" | "serving" | "cleaning" | "suspended
 export const STATE_LABEL: Record<TableState, string> = {
   free: "Trống", booked: "Có khách đặt", serving: "Đang phục vụ", cleaning: "Chờ dọn", suspended: "Tạm ngưng",
 };
-/** Màu thẻ bàn — luôn đi kèm chữ. Bàn có khách đặt tô đỏ. */
-export const STATE_CLS: Record<TableState, string> = {
-  free: "border-fresh-500 bg-fresh-50 text-fresh-900",
+/**
+ * Màu theo TẦNG (nhận diện bàn): tầng trệt xanh lá #70bf54, tầng 2 cam san hô #f47a63, tầng 4 xanh dương #4aa6de.
+ * Màu theo TRẠNG THÁI (luôn kèm chữ): trống = nền nhạt theo màu tầng; có khách đặt = ĐỎ; đang phục vụ = vàng;
+ * chờ dọn = tím; tạm ngưng = xám.
+ */
+export interface FloorStyle { name: string; border: string; bg: string; text: string; bar: string; dot: string; leftBar: string }
+const FLOOR_STYLES: Record<string, FloorStyle> = {
+  T1: { name: "xanh lá", border: "border-fresh-500", bg: "bg-fresh-50", text: "text-fresh-900", bar: "border-b-fresh-500", dot: "bg-fresh-500", leftBar: "border-l-fresh-500" },
+  T2: { name: "cam san hô", border: "border-coral-500", bg: "bg-coral-50", text: "text-coral-900", bar: "border-b-coral-500", dot: "bg-coral-500", leftBar: "border-l-coral-500" },
+  T4: { name: "xanh dương", border: "border-ocean-400", bg: "bg-ocean-50", text: "text-ocean-900", bar: "border-b-ocean-400", dot: "bg-ocean-400", leftBar: "border-l-ocean-400" },
+};
+const FLOOR_FALLBACK: FloorStyle = { name: "xám", border: "border-stone-400", bg: "bg-stone-50", text: "text-stone-800", bar: "border-b-stone-400", dot: "bg-stone-400", leftBar: "border-l-stone-400" };
+export const floorStyle = (code: string): FloorStyle => FLOOR_STYLES[code] ?? FLOOR_FALLBACK;
+
+const STATE_BASE: Record<Exclude<TableState, "free">, string> = {
   booked: "border-red-600 bg-red-100 text-red-900",
-  serving: "border-coral-500 bg-coral-100 text-coral-900",
-  cleaning: "border-ocean-400 bg-ocean-50 text-ocean-900",
+  serving: "border-amber-500 bg-amber-100 text-amber-900",
+  cleaning: "border-violet-400 bg-violet-100 text-violet-900",
   suspended: "border-stone-400 bg-stone-200 text-stone-600",
+};
+/** Lớp CSS của thẻ bàn: viền trái luôn mang màu tầng để nhận biết tầng ở mọi trạng thái. */
+export function stateClass(state: TableState, floor: string) {
+  const f = floorStyle(floor);
+  return `${state === "free" ? `${f.border} ${f.bg} ${f.text}` : STATE_BASE[state]} border-l-[10px] ${f.leftBar}`;
+}
+/** Mẫu màu cho chú giải trạng thái */
+export const STATE_SWATCH: Record<TableState, string> = {
+  free: "border-stone-400 bg-white", booked: STATE_BASE.booked, serving: STATE_BASE.serving, cleaning: STATE_BASE.cleaning, suspended: STATE_BASE.suspended,
 };
 
 export interface TableView {

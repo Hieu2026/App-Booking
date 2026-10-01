@@ -2,6 +2,7 @@
 import { useAppContext } from "./ContextProvider";
 import { AlertTriangle, Users } from "lucide-react";
 import { fmtTime } from "@/lib/time";
+import { floorStyle } from "@/lib/board";
 import type { Availability } from "@/lib/types";
 
 interface Props {
@@ -44,16 +45,17 @@ export function TablePicker({ availability, loading, error, selected, onToggle, 
                 const servingLate = t.serving && startIso && new Date(t.serving.end_at).getTime() > new Date(startIso).getTime();
                 const tight = t.next_start && endIso && new Date(t.next_start).getTime() - new Date(endIso).getTime() < 30 * 60000;
                 let note = "Trống";
-                let tone = "border-fresh-500 bg-fresh-50 text-fresh-900";
+                const fs = floorStyle(t.floor_code);
+                let tone = `${fs.border} ${fs.bg} ${fs.text}`;
                 if (suspended) { note = "Tạm ngưng"; tone = "border-stone-300 bg-stone-100 text-stone-500"; }
                 else if (conflict) { note = `Đã đặt ${fmtTime(conflict.start_at)}–${fmtTime(conflict.end_at)} · ${conflict.booking_code}`; tone = "border-red-500 bg-red-100 text-red-900"; }
-                else if (notReady) { note = t.ops_status === "serving" ? "Đang phục vụ" : "Chờ dọn"; tone = "border-coral-500 bg-coral-50 text-coral-900"; }
-                else if (servingLate) { note = `Đang phục vụ đến ${fmtTime(t.serving!.end_at)}`; tone = "border-coral-500 bg-coral-50 text-coral-900"; }
-                else if (tight) { note = `Trống · lượt kế tiếp ${fmtTime(t.next_start!)}`; tone = "border-amber-400 bg-amber-50 text-amber-900"; }
+                else if (notReady) { note = t.ops_status === "serving" ? "Đang phục vụ" : "Chờ dọn"; tone = "border-amber-500 bg-amber-50 text-amber-900"; }
+                else if (servingLate) { note = `Đang phục vụ đến ${fmtTime(t.serving!.end_at)}`; tone = "border-amber-500 bg-amber-50 text-amber-900"; }
+                else if (tight) { note = `Trống · lượt kế tiếp ${fmtTime(t.next_start!)}`; tone = "border-yellow-400 bg-yellow-50 text-yellow-900"; }
                 return (
                   <button key={t.id} type="button" disabled={disabled || blocked} aria-pressed={sel} data-testid={`pick-${t.code}`}
                     onClick={() => onToggle(t.id)} title={note}
-                    className={`min-h-16 rounded-xl border-2 p-2 text-left text-sm transition disabled:cursor-not-allowed disabled:opacity-60 ${tone} ${sel ? "ring-4 ring-leaf-600 ring-offset-1" : ""}`}>
+                    className={`min-h-16 rounded-xl border-2 border-l-[10px] ${fs.leftBar} p-2 text-left text-sm transition disabled:cursor-not-allowed disabled:opacity-60 ${tone} ${sel ? "ring-4 ring-leaf-600 ring-offset-1" : ""}`}>
                     <div className="flex items-center justify-between font-extrabold">
                       <span>{t.code}</span>
                       <span className="flex items-center gap-1 text-xs"><Users size={13} aria-hidden />{t.capacity}</span>

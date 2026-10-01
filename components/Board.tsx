@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { AlertTriangle, CalendarClock, ChevronLeft, ChevronRight, LayoutGrid, List, Plus, Rows3, Users, UserPlus } from "lucide-react";
 import { useAppContext } from "./ContextProvider";
 import { EmptyState, Modal, StatusChip, useRun } from "./ui";
-import { computeStats, computeViews, STATE_CLS, STATE_LABEL, timelineRange, type TableState, type TableView } from "@/lib/board";
+import { computeStats, computeViews, floorStyle, STATE_LABEL, STATE_SWATCH, stateClass, timelineRange, type TableState, type TableView } from "@/lib/board";
 import { addDays, fmtDateLong, fmtTime, minutesOf, nowMinutes, floorTo, timeOf, todayVn } from "@/lib/time";
 import { BOOKING_STATUS } from "@/lib/labels";
 import { setStatusAction, setTableStatusAction } from "@/app/actions";
@@ -100,7 +100,7 @@ export function BoardClient({ board, date, from: fromProp, to: toProp }: { board
       <section className="grid grid-cols-2 gap-3 lg:grid-cols-5" aria-label="Thống kê">
         <Stat label="Bàn trống" sub={`trong ${from}–${to}`} value={stats.free} cls="text-fresh-700" />
         <Stat label="Bàn có lịch" sub={`trong ${from}–${to}`} value={stats.booked} cls="text-red-700" />
-        <Stat label="Đang phục vụ" sub="hiện tại" value={stats.serving} cls="text-coral-700" />
+        <Stat label="Đang phục vụ" sub="hiện tại" value={stats.serving} cls="text-amber-700" />
         <Stat label="Lượt đặt trong ngày" sub="không tính đã hủy / không đến" value={stats.bookings} cls="text-leaf-800" />
         <Stat label="Khách dự kiến" sub="tổng số khách trong ngày" value={stats.guests} cls="text-leaf-800" />
       </section>
@@ -162,12 +162,18 @@ function Stat({ label, sub, value, cls }: { label: string; sub: string; value: n
 }
 
 function Legend() {
+  const ctx = useAppContext();
   return (
-    <ul className="ml-auto flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-stone-600" aria-label="Chú giải màu">
-      {(Object.keys(STATE_LABEL) as TableState[]).map((s) => (
-        <li key={s} className="flex items-center gap-1"><span className={`inline-block h-3 w-3 rounded border-2 ${STATE_CLS[s]}`} />{STATE_LABEL[s]}</li>
-      ))}
-    </ul>
+    <div className="ml-auto flex flex-col items-end gap-1 text-xs text-stone-600" aria-label="Chú giải màu">
+      <ul className="flex flex-wrap items-center justify-end gap-x-3 gap-y-1" aria-label="Màu theo tầng">
+        {ctx.floors.map((f) => <li key={f.code} className="flex items-center gap-1"><span className={`inline-block h-3 w-3 rounded-sm ${floorStyle(f.code).dot}`} />{f.name}</li>)}
+      </ul>
+      <ul className="flex flex-wrap items-center justify-end gap-x-3 gap-y-1" aria-label="Màu theo trạng thái">
+        {(Object.keys(STATE_LABEL) as TableState[]).map((s) => (
+          <li key={s} className="flex items-center gap-1"><span className={`inline-block h-3 w-3 rounded border-2 ${STATE_SWATCH[s]}`} />{STATE_LABEL[s]}{s === "free" ? " (nền nhạt theo màu tầng)" : ""}</li>
+        ))}
+      </ul>
+    </div>
   );
 }
 
@@ -183,7 +189,7 @@ function GridView({ views, onOpen }: { views: TableView[]; onOpen: (id: string) 
         const free = list.filter((v) => v.state === "free").length;
         return (
           <section key={f.code} aria-label={f.name}>
-            <h2 className="mb-2 flex items-baseline gap-2 text-lg font-bold text-leaf-900">
+            <h2 className={`mb-2 flex items-baseline gap-2 border-b-4 pb-1 text-lg font-bold text-leaf-900 ${floorStyle(f.code).bar}`}>
               {f.name}
               <span className="text-sm font-normal text-stone-500">{list.length} bàn · {list.reduce((s, v) => s + v.table.capacity, 0)} chỗ · {free} trống</span>
             </h2>
@@ -201,7 +207,7 @@ function TableCard({ v, onOpen }: { v: TableView; onOpen: () => void }) {
   const b = v.nearest;
   return (
     <button onClick={onOpen} data-testid={`table-${v.table.code}`} data-state={v.state}
-      className={`flex min-h-28 flex-col rounded-2xl border-2 p-3 text-left shadow-sm transition hover:shadow-md ${STATE_CLS[v.state]}`}>
+      className={`flex min-h-28 flex-col rounded-2xl border-2 p-3 text-left shadow-sm transition hover:shadow-md ${stateClass(v.state, v.table.floor_code)}`}>
       <div className="flex items-start justify-between gap-1">
         <span className="text-xl font-extrabold leading-tight">{v.table.code}</span>
         <span className="flex items-center gap-1 text-sm font-semibold"><Users size={15} aria-hidden />{v.table.capacity}</span>
@@ -285,7 +291,7 @@ function Timeline({ views, date, now }: { views: TableView[]; date: string; now:
         </div>
         {views.map((v) => (
           <div key={v.table.id} className="flex border-b border-cream-200">
-            <div className="w-24 shrink-0 px-2 py-2 text-sm font-bold">{v.table.code}<span className="ml-1 text-xs font-normal text-stone-500">{v.table.capacity}</span></div>
+            <div className={`w-24 shrink-0 border-l-[10px] px-2 py-2 text-sm font-bold ${floorStyle(v.table.floor_code).leftBar}`}>{v.table.code}<span className="ml-1 text-xs font-normal text-stone-500">{v.table.capacity}</span></div>
             <div className="relative h-11 flex-1">
               {hours.map((h) => <span key={h} className="absolute inset-y-0 border-l border-cream-200" style={{ left: `${((h * 60 - lo) / span) * 100}%` }} />)}
               {v.dayBookings.filter((b) => b.status !== "cancelled" && b.status !== "no_show").map((b) => {
@@ -293,7 +299,7 @@ function Timeline({ views, date, now }: { views: TableView[]; date: string; now:
                 const e = Math.min((new Date(b.end_at).getTime() - dayStart) / 60000, hi);
                 return (
                   <Link key={b.id} href={`/dat-ban/${b.id}`} title={`${b.code} · ${b.customer_name ?? "Khách vãng lai"} · ${BOOKING_STATUS[b.status].label}`}
-                    className={`absolute inset-y-1 overflow-hidden rounded-md border px-1.5 text-xs font-semibold leading-tight ${b.status === "completed" ? "border-stone-300 bg-stone-200 text-stone-700" : b.status === "arrived" ? "border-coral-500 bg-coral-100 text-coral-900" : "border-red-600 bg-red-100 text-red-900"}`}
+                    className={`absolute inset-y-1 overflow-hidden rounded-md border px-1.5 text-xs font-semibold leading-tight ${b.status === "completed" ? "border-stone-300 bg-stone-200 text-stone-700" : b.status === "arrived" ? "border-amber-500 bg-amber-100 text-amber-900" : "border-red-600 bg-red-100 text-red-900"}`}
                     style={{ left: `${((s - lo) / span) * 100}%`, width: `${((e - s) / span) * 100}%` }}>
                     {fmtTime(b.start_at)} {b.customer_name ?? "Vãng lai"}
                   </Link>
@@ -326,7 +332,7 @@ function TableDrawer({ view, date, from, to, onClose, run }: {
   return (
     <Modal open onClose={onClose} title={`Bàn ${t.code} · ${t.capacity} chỗ`} wide>
       <div className="mb-3 flex flex-wrap items-center gap-2">
-        <span className={`chip ring-0 border-2 ${STATE_CLS[view.state]}`}>{STATE_LABEL[view.state]}</span>
+        <span className={`chip ring-0 border-2 ${stateClass(view.state, t.floor_code)}`}>{STATE_LABEL[view.state]}</span>
         <span className="text-sm text-stone-600">Vận hành: <b>{{ ready: "Sẵn sàng", serving: "Đang phục vụ", cleaning: "Chờ dọn", suspended: "Tạm ngưng" }[t.ops_status]}</b></span>
       </div>
       {view.warning && <p role="alert" className="mb-3 flex gap-2 rounded-lg bg-red-50 p-3 text-sm font-semibold text-red-800"><AlertTriangle size={18} className="shrink-0" aria-hidden />{view.warning}</p>}
